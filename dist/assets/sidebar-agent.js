@@ -90,9 +90,55 @@
     }
   }
 
-  // Inject theme color picker into settings page (BEFORE the "关于" section)
-  setInterval(function() {
+  // Inject update check and theme color picker into settings page
+  var injectTimer = setInterval(function() {
     if (window.location.hash !== '#/settings') return;
+    
+    // Update check UI (only once)
+    if (!document.getElementById('update-check-ui')) {
+      var headings = document.querySelectorAll('h1,h2,h3,h4');
+      var aboutH = null;
+      for (var i=0;i<headings.length;i++) {
+        if (headings[i].textContent.indexOf('关于') >= 0) { aboutH = headings[i]; break; }
+      }
+      if (aboutH) {
+        var card = aboutH.closest('[class*="rounded-xl"],[class*="card"]') || aboutH.parentElement;
+        if (card) {
+          var dv = document.createElement('div');
+          dv.id = 'update-check-ui';
+          dv.style.cssText = 'padding:16px;border-radius:12px;background:rgba(30,41,59,.6);border:1px solid rgba(71,85,105,.3);margin-bottom:16px';
+          dv.innerHTML = '<div style="font-size:13px;font-weight:600;color:#f1f5f9;margin-bottom:8px">检查更新</div><div style="font-size:11px;color:#94a3b8;margin-bottom:10px">当前版本: v1.1.1</div><button id="update-btn" class="btn-primary" style="background:#3b82f6;color:#fff;border:none;border-radius:6px;padding:6px 14px;cursor:pointer;font-size:12px">检查更新</button><div id="update-status" style="margin-top:8px;font-size:11px;color:#94a3b8"></div>';
+          card.parentNode.insertBefore(dv, card);
+          document.getElementById('update-btn').onclick = function() {
+            var st = document.getElementById('update-status'); st.textContent = '正在检查...';
+            var a = window.agentApi || {};
+            (a.checkUpdate?a.checkUpdate():Promise.resolve({})).then(function(r) {
+              if (r.error) { st.textContent = '检查失败: ' + r.error; return; }
+              if (r.hasUpdate) {
+                st.innerHTML = '发现新版本: ' + r.latestVersion + '<br><span style="font-size:10px;color:#64748b">'+(r.releaseNotes||'').slice(0,200)+'</span><br><br>';
+                var dl = document.createElement('button'); dl.style.cssText = 'background:#22c55e;color:#fff;border:none;border-radius:6px;padding:6px 14px;cursor:pointer;font-size:12px;margin-right:6px'; dl.textContent = '下载更新';
+                dl.onclick = function() {
+                  st.textContent = '正在下载...';
+                  var asset = r.assets&&r.assets[0]||{};
+                  (a.downloadUpdate?a.downloadUpdate(asset.url):Promise.resolve({})).then(function(d) {
+                    if (d.error) { st.textContent = '下载失败: ' + d.error; return; }
+                    st.innerHTML = '下载完成！<br><button id="run-update" style="background:#22c55e;color:#fff;border:none;border-radius:6px;padding:6px 14px;cursor:pointer;font-size:12px;margin-top:6px">立即安装</button>';
+                    document.getElementById('run-update').onclick = function() {
+                      (a.installUpdate?a.installUpdate(d.path):Promise.resolve({})).then(function(){st.textContent='安装程序已启动...'});
+                    };
+                  });
+                };
+                st.appendChild(dl);
+              } else {
+                st.innerHTML = '已是最新版本 <span style="color:#22c55e">v1.1.1</span>';
+              }
+            }).catch(function(e){st.textContent='检查失败: '+e.message});
+          };
+        }
+      }
+    }
+    
+    // Theme color picker
     if (document.getElementById('theme-picker-ui')) return;
     // Find the "关于" section - look for heading containing "关于" or "About"
     var headings = document.querySelectorAll('h1,h2,h3,h4');

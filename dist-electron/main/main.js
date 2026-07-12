@@ -156,7 +156,7 @@ const APP_META = {
   copyright: "Copyright (C) 2026 J1ao",
   // 作者信息
   author: "J1ao",
-  authorQQ: "1987800833",
+  authorQQ: "3038929349",
   // GitHub 仓库地址(留空)
   authorEmail: "1987800833@qq.com",
   // 参考的项目(业务逻辑参考,非代码衍生)
@@ -9600,8 +9600,7 @@ process.on("unhandledRejection", (reason) => {
 });
 
 
-
-// [iMooAgent] AI Agent Addon
+// [iMooAgent]
 // Agent addon code - loaded by build-clean.js
 (function() {
   var electron = require("electron");
@@ -9744,6 +9743,51 @@ process.on("unhandledRejection", (reason) => {
     var img = nativeImage.createFromPath(path.join(require("electron").app.getAppPath(),"dist","assets","icon.png"));
     require("electron").BrowserWindow.getAllWindows().forEach(function(w) { if (!w.isDestroyed()) try { w.setIcon(img); } catch(e) {} });
   } catch(e) {}
+
+  // Check for updates from GitHub Releases
+  ipcMain.handle("agent:check-update", async function() {
+    try {
+      var repo = "Onesoft-J1ao/iMooAgentTool";
+      var url = "https://api.github.com/repos/" + repo + "/releases/latest";
+      var res = await fetch(url, { headers: { "Accept": "application/vnd.github.v3+json", "User-Agent": "iMooAgentTool" } });
+      if (!res.ok) return { error: "HTTP " + res.status };
+      var data = await res.json();
+      var tag = data.tag_name || "";
+      var current = "v1.1.1";
+      var hasUpdate = tag.toLowerCase() !== current.toLowerCase();
+      return {
+        hasUpdate: hasUpdate,
+        currentVersion: current,
+        latestVersion: tag,
+        releaseUrl: data.html_url || "",
+        releaseNotes: (data.body || "").slice(0, 500),
+        downloadUrl: null,
+        assets: (data.assets || []).map(function(a) { return { name: a.name, url: a.browser_download_url, size: a.size }; })
+      };
+    } catch(e) { return { error: e.message }; }
+  });
+
+  ipcMain.handle("agent:download-update", async function(event, args) {
+    try {
+      var url = args && args.url;
+      if (!url) return { error: "No URL" };
+      var dest = path.join(require("electron").app.getPath("temp"), "iMooAgentTool-update.exe");
+      var res = await fetch(url);
+      if (!res.ok) return { error: "Download failed: HTTP " + res.status };
+      var buf = await res.arrayBuffer();
+      fs.writeFileSync(dest, Buffer.from(buf));
+      return { success: true, path: dest };
+    } catch(e) { return { error: e.message }; }
+  });
+
+  ipcMain.handle("agent:install-update", async function(event, args) {
+    try {
+      var exePath = args && args.path;
+      if (!exePath || !fs.existsSync(exePath)) return { error: "File not found" };
+      require("child_process").execFile(exePath, ["/S", "/D=" + path.dirname(require("electron").app.getPath("exe"))]);
+      return { success: true };
+    } catch(e) { return { error: e.message }; }
+  });
 
   console.log("[iMooAgent] IPC registered");
 })();

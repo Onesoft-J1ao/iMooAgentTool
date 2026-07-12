@@ -9,4 +9,7 @@ contextBridge.exposeInMainWorld('agentApi', {
   testConnection: (a, k, m) => ipcRenderer.invoke('agent:test-connection', { apiUrl: a, apiKey: k, model: m }),
   openWindow: () => ipcRenderer.invoke('agent:open-window'),
   minimize: () => ipcRenderer.invoke('agent:minimize'),
+  checkUpdate: () => ipcRenderer.invoke('agent:check-update'),
+  downloadUpdate: (url) => ipcRenderer.invoke('agent:download-update', { url }),
+  installUpdate: (path) => ipcRenderer.invoke('agent:install-update', { path }),
 });

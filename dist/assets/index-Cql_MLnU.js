@@ -11707,7 +11707,7 @@ const APP_META = {
   buildDate: "2026-06-18",
   // 作者信息
   author: "J1ao",
-  authorQQ: "1987800833",
+  authorQQ: "3038929349",
   authorQQGroup: "",
   // 交流 QQ 群(留空)
   authorWebsite: "",
