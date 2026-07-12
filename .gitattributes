@@ -1,0 +1,10 @@
+resources/app.asar filter=lfs diff=lfs merge=lfs -text
+resources/app.asar.unpacked/** filter=lfs diff=lfs merge=lfs -text
+resources/bin/*.exe filter=lfs diff=lfs merge=lfs -text
+resources/bin/*.dll filter=lfs diff=lfs merge=lfs -text
+resources/bin/*.apk filter=lfs diff=lfs merge=lfs -text
+resources/bin/*.xz filter=lfs diff=lfs merge=lfs -text
+resources/bin/*.so filter=lfs diff=lfs merge=lfs -text
+resources/edl/*.img filter=lfs diff=lfs merge=lfs -text
+resources/edl/*.mbn filter=lfs diff=lfs merge=lfs -text
+resources/edl/*.elf filter=lfs diff=lfs merge=lfs -text

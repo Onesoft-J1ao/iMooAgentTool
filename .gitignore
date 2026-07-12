@@ -5,7 +5,6 @@ release/
 package-lock.json
 tmp-asar-extract/
 temp-extract/
-resources/app.asar.unpacked/resources/
 *.exe
 *.dll
 *.apk
@@ -14,3 +13,5 @@ resources/app.asar.unpacked/resources/
 *.img
 *.mbn
 *.elf
+
+tmp-asar-extract/
