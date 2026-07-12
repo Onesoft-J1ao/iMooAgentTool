@@ -1,0 +1,16 @@
+node_modules/
+release/
+*.log
+.DS_Store
+package-lock.json
+tmp-asar-extract/
+temp-extract/
+resources/app.asar.unpacked/resources/
+*.exe
+*.dll
+*.apk
+*.xz
+*.so
+*.img
+*.mbn
+*.elf

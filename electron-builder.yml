@@ -1,0 +1,37 @@
+appId: io.github.j1ao.imooagenttool
+productName: iMooAgentTool
+copyright: Copyright (C) 2026 J1ao
+directories:
+  output: release
+files:
+  - dist/**/*
+  - dist-electron/**/*
+  - resources/**/*
+  - node_modules/**/*
+  - package.json
+asar: true
+asarUnpack:
+  - resources/bin/**
+  - resources/edl/**
+  - resources/scripts/**
+  - node_modules/usb/**
+  - node_modules/@node-usb/**
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+    - target: portable
+      arch: [x64]
+  icon: resources/assets/icon.ico
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: iMooAgentTool
+  runAfterFinish: true
+  deleteAppDataOnUninstall: false
+  include: build/installer.nsh
+portable:
+  artifactName: ${productName}-${version}-portable.exe
