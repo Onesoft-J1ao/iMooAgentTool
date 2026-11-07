@@ -1,13 +1,13 @@
 import { ipcMain, BrowserWindow } from 'electron';
 import { wrap } from '../lib/ipcHelper';
 import { scrcpyService } from '../services/ScrcpyService';
-import type { ScrcpyOptions } from "../../shared/types";
+import type { ScrcpyOptions } from '../../shared/types';
 
 export function registerScrcpyIpc() {
   ipcMain.handle(
     'scrcpy:launch',
-    wrap(async (_event, options?: ScrcpyOptions) => {
-      return scrcpyService.launch(options || {});
+    wrap(async (_event, { serial, options }: { serial?: string; options?: ScrcpyOptions }) => {
+      return scrcpyService.launch(serial, options || {});
     })
   );
 
@@ -36,7 +36,7 @@ export function registerScrcpyIpc() {
     'scrcpy:subscribe',
     wrap(async (event) => {
       const win = BrowserWindow.fromWebContents(event.sender);
-      const handler = (data: any) => {
+      const handler = (data: unknown) => {
         if (win && !win.isDestroyed()) {
           win.webContents.send('scrcpy:process-change', data);
         }

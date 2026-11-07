@@ -71,7 +71,7 @@ export function registerSystemIpc() {
     'system:set-window-opacity',
     wrap(async (_event, opacity: number) => {
       const win = BrowserWindow.getFocusedWindow();
-      if (win) win.setOpacity(opacity / 100);
+      if (win) win.setOpacity(Math.max(0.2, Math.min(1, opacity)));
     })
   );
 

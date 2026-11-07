@@ -13,14 +13,17 @@ export function registerEdlPartitionIpc() {
   ipcMain.handle(
     'edl-part:check-edl-device',
     wrap(async () => {
-      return edlPartitionService.checkEdlDevice();
+      const result = await edlPartitionService.checkEdlDevice();
+      return { found: result.inEdl, port: result.port };
     })
   );
 
   ipcMain.handle(
     'edl-part:print-gpt',
     wrap(async (_event, { loader }: { loader: string }) => {
-      return edlPartitionService.printGpt({ loader });
+      const result = await edlPartitionService.printGpt({ loader });
+      if (!result.success) throw new Error(result.error || '读取 GPT 失败');
+      return result;
     })
   );
 

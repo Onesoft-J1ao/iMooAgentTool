@@ -257,15 +257,48 @@ class EdlPartitionServiceClass {
 
   async spawnEdlNg(args: string[], onProgress?: (msg: string) => void) {
     logger.info('edl-ng ' + args.join(' '));
-    return subprocessPool.spawn({ cmd: this.edlNgPath, args, encoding: 'utf-8', timeout: 0, cwd: this.edlNgDir, onStdout: (line: string) => { logger.info('edl-ng: ' + line); onProgress?.(line); }, onStderr: (line: string) => { logger.warn('edl-ng stderr: ' + line); } });
+    return subprocessPool.spawn({
+      cmd: this.edlNgPath,
+      args,
+      encoding: 'utf-8',
+      timeout: 0,
+      cwd: this.edlNgDir,
+      onStdout: (line: string) => {
+        logger.info('edl-ng: ' + line);
+        onProgress?.(line);
+        this.emitProgress(line);
+      },
+      onStderr: (line: string) => logger.warn('edl-ng stderr: ' + line),
+    });
   }
 
   async spawnEdlNgWithProgress(args: string[], onProgress?: (msg: string) => void, onTransferProgress?: (info: any) => void) {
     logger.info('edl-ng ' + args.join(' '));
-    return subprocessPool.spawn({ cmd: this.edlNgPath, args, encoding: 'utf-8', timeout: 0, cwd: this.edlNgDir, onStdout: (line: string) => {
-      const m = line.match(PROGRESS_RE);
-      if (m && onTransferProgress) { onTransferProgress({ operation: m[1], percent: parseFloat(m[2]), transferredMiB: parseFloat(m[3]), totalMiB: parseFloat(m[4]), speed: m[5] }); } else { logger.info('edl-ng: ' + line); onProgress?.(line); }
-    }, onStderr: (line: string) => { logger.warn('edl-ng stderr: ' + line); } });
+    return subprocessPool.spawn({
+      cmd: this.edlNgPath,
+      args,
+      encoding: 'utf-8',
+      timeout: 0,
+      cwd: this.edlNgDir,
+      onStdout: (line: string) => {
+        const m = line.match(PROGRESS_RE);
+        if (m && onTransferProgress) {
+          onTransferProgress({ operation: m[1], percent: parseFloat(m[2]), transferredMiB: parseFloat(m[3]), totalMiB: parseFloat(m[4]), speed: m[5] });
+          this.emitProgress(line, parseFloat(m[2]));
+        } else {
+          logger.info('edl-ng: ' + line);
+          onProgress?.(line);
+          this.emitProgress(line);
+        }
+      },
+      onStderr: (line: string) => logger.warn('edl-ng stderr: ' + line),
+    });
+  }
+
+  private emitProgress(message: string, percent = 0) {
+    for (const win of require('electron').BrowserWindow.getAllWindows()) {
+      if (!win.isDestroyed()) win.webContents.send('edl-part:progress', { stage: 'EDL', percent, message });
+    }
   }
 }
 

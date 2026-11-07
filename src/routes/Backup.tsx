@@ -1,324 +1,226 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
-  HardDrive, Download, Upload, RefreshCw, Flashlight, Smartphone,
-  Shield, Zap, Folder, CheckCircle, AlertTriangle
+  HardDrive, Download, Upload, RefreshCw, Shield, Zap, Smartphone,
+  AlertTriangle, CheckCircle, FolderOpen, Puzzle,
 } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useDeviceStore } from '@/stores/deviceStore';
-import { getDisplayName } from '@/lib/models';
 
-type TabId = 'dcim' | 'adbdd' | 'edl' | 'super' | 'twrp' | 'auto-twrp' | 'xposed';
+type TabId = 'dcim' | 'adbdd' | 'edl' | 'super' | 'twrp' | 'xposed';
 
-interface TabInfo {
-  id: TabId;
-  label: string;
-}
-
-const tabs: TabInfo[] = [
-  { id: 'dcim', label: 'DCIM' },
-  { id: 'adbdd', label: 'ADB-dd' },
+const tabs: Array<{ id: TabId; label: string }> = [
+  { id: 'dcim', label: '相册备份' },
+  { id: 'adbdd', label: 'ADB-dd 分区' },
   { id: 'edl', label: 'EDL 9008' },
-  { id: 'super', label: 'Super Recovery' },
-  { id: 'twrp', label: 'TWRP Flash' },
-  { id: 'auto-twrp', label: 'Auto Flash TWRP' },
-  { id: 'xposed', label: 'Xposed Install' },
+  { id: 'super', label: '超级恢复' },
+  { id: 'twrp', label: 'TWRP' },
+  { id: 'xposed', label: 'Xposed' },
 ];
 
 export default function Backup() {
   const { currentDevice } = useDeviceStore();
   const [activeTab, setActiveTab] = useState<TabId>('dcim');
-  const [progress, setProgress] = useState<{ stage: string; percent: number; message: string } | null>(null);
   const [loading, setLoading] = useState<string | null>(null);
+  const [progress, setProgress] = useState<{ stage: string; percent: number; message: string } | null>(null);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const unsub = api.backup.onProgress(setProgress);
     return () => unsub();
   }, []);
 
-  const pickFolder = async (): Promise<string | null> => {
+  const run = async (key: string, fn: () => Promise<unknown>, successText: string) => {
+    setLoading(key);
+    setError('');
+    setMessage('');
+    try {
+      const result = await fn();
+      if (result && typeof result === 'object' && 'error' in result && result.error) {
+        setError(String(result.error));
+      } else {
+        setMessage(successText);
+      }
+    } catch (e) {
+      setError((e as Error).message);
+    }
+    setLoading(null);
+  };
+
+  const pickFolder = async () => {
     const result = await api.system.pickFile({ kind: 'folder' });
     return result as string | null;
   };
 
-  const pickZip = async (): Promise<string | null> => {
-    const result = await api.system.pickFile({ kind: 'open', filter: 'ZIP files (*.zip)' });
+  const pickZip = async () => {
+    const result = await api.system.pickFile({ kind: 'open', filter: 'zip' });
     return result as string | null;
   };
 
   const handleDcimBackup = async () => {
     const folder = await pickFolder();
     if (!folder) return;
-    setLoading('dcim-backup');
-    try { await api.backup.dcimBackup(folder); } catch (err) { console.error(err); }
-    setLoading(null);
+    await run('dcim-backup', () => api.backup.dcimBackup(folder), '相册备份完成');
   };
 
   const handleDcimRecover = async () => {
     const folder = await pickFolder();
     if (!folder) return;
-    setLoading('dcim-recover');
-    try { await api.backup.dcimRecover(folder); } catch (err) { console.error(err); }
-    setLoading(null);
+    await run('dcim-recover', () => api.backup.dcimRecover(folder), '相册恢复完成');
   };
 
   const handleAdbddBackup = async () => {
     const folder = await pickFolder();
     if (!folder) return;
-    setLoading('adbdd-backup');
-    try { await api.backup.adbddBackup(folder); } catch (err) { console.error(err); }
-    setLoading(null);
+    await run('adbdd-backup', () => api.backup.adbddBackup(folder), 'ADB-dd 分区备份完成');
   };
 
   const handleAdbddRecover = async () => {
     const zip = await pickZip();
     if (!zip) return;
-    setLoading('adbdd-recover');
-    try { await api.backup.adbddRecover(zip); } catch (err) { console.error(err); }
-    setLoading(null);
-  };
-
-  const handleAdbddPrepare = async () => {
-    const zip = await pickZip();
-    if (!zip) return;
-    setLoading('adbdd-prepare');
-    try {
-      const result = await api.backup.adbddPrepare(zip);
-      if (result.matched.length > 0) {
-        const dir = await pickFolder();
-        if (dir) {
-          await api.backup.adbddExecute(dir, result.matched);
-        }
-      }
-    } catch (err) { console.error(err); }
-    setLoading(null);
+    await run('adbdd-recover', () => api.backup.adbddRecover(zip), 'ADB-dd 分区恢复完成');
   };
 
   const handleEdlBackup = async () => {
-    setLoading('edl-backup');
-    try { await api.backup.edlBackup({}); } catch (err) { console.error(err); }
+    const folder = await pickFolder();
+    if (!folder) return;
+    const xmlFiles: string[] = [];
+    setError('EDL 备份需要选择 rawprogram XML 文件，当前版本请使用 EDL 分区管理逐个备份。');
     setLoading(null);
+    return xmlFiles;
   };
 
   const handleEdlRecover = async () => {
-    const zip = await pickZip();
-    if (!zip) return;
-    setLoading('edl-recover');
-    try { await api.backup.edlRecover(zip); } catch (err) { console.error(err); }
-    setLoading(null);
+    setError('EDL 恢复需要 rawprogram XML 文件，当前版本请使用 EDL 分区管理逐个恢复。');
   };
 
   const handleSuperRecovery = async () => {
-    const folder = await pickFolder();
-    if (!folder) return;
-    setLoading('super');
-    try { await api.backup.superRecovery(folder); } catch (err) { console.error(err); }
-    setLoading(null);
+    setError('超级恢复需要按机型准备 XML 文件组，当前版本请使用 EDL 分区管理逐分区恢复。');
   };
 
-  const handleFlashTwrp = async () => {
-    if (!currentDevice?.innermodel) return;
-    setLoading('twrp');
-    try { await api.backup.flashTwrp(currentDevice.innermodel); } catch (err) { console.error(err); }
-    setLoading(null);
+  const handleTwrp = async () => {
+    if (!currentDevice?.innermodel) {
+      setError('未检测到设备内部型号');
+      return;
+    }
+    await run('twrp', () => api.backup.autoFlashTwrp(currentDevice.innermodel!), 'TWRP 刷入完成');
   };
 
-  const handleAutoFlashTwrp = async () => {
-    if (!currentDevice?.innermodel) return;
-    setLoading('auto-twrp');
-    try { await api.backup.autoFlashTwrp(currentDevice.innermodel); } catch (err) { console.error(err); }
-    setLoading(null);
+  const handleXposed = async () => {
+    await run('xposed', () => api.backup.xposedInstall(), 'Xposed 安装完成');
   };
 
-  const handleXposedInstall = async () => {
-    setLoading('xposed');
-    try { await api.backup.xposedInstall(); } catch (err) { console.error(err); }
-    setLoading(null);
-  };
-
-  const isTabDisabled = (tabId: TabId): boolean => {
-    if (tabId === 'twrp' || tabId === 'auto-twrp' || tabId === 'dcim' || tabId === 'adbdd') return !currentDevice;
-    return false;
-  };
+  const disabled = !currentDevice && (activeTab === 'dcim' || activeTab === 'adbdd' || activeTab === 'twrp');
 
   return (
     <div className="p-6 space-y-6 overflow-y-auto h-full">
       <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-        <HardDrive className="w-6 h-6 text-blue-400" />
-        备份与恢复
+        <HardDrive className="w-6 h-6 text-blue-400" />备份与恢复
       </h1>
 
       {currentDevice ? (
         <div className="card text-sm flex items-center gap-3">
           <Smartphone className="w-5 h-5 text-green-400" />
-          <span className="text-green-400 font-medium">{getDisplayName(currentDevice.innermodel ?? '')}</span>
-          <span className="text-slate-400">|</span>
+          <span className="text-green-400 font-medium">{currentDevice.innermodel || currentDevice.model || '已连接设备'}</span>
+          <span className="text-slate-500">|</span>
           <span className="text-slate-400">{currentDevice.serial}</span>
           <span className="badge-success ml-auto">{currentDevice.type}</span>
         </div>
       ) : (
         <div className="card text-sm text-yellow-400 flex items-center gap-2">
-          <AlertTriangle className="w-4 h-4" />
-          未连接设备
+          <AlertTriangle className="w-4 h-4" />未连接设备
         </div>
       )}
 
-      <div className="flex gap-1 border-b border-slate-700 overflow-x-auto">
-        {tabs.map((t) => (
-          <button key={t.id} onClick={() => setActiveTab(t.id)} disabled={isTabDisabled(t.id)}
-            className={`shrink-0 px-4 py-2 text-sm font-medium transition-colors ${
-              activeTab === t.id ? 'text-blue-400 border-b-2 border-blue-400' : 'text-slate-400 hover:text-white'
-            } disabled:opacity-40 disabled:cursor-not-allowed`}>
-            {t.label}
+      {message && <div className="card text-sm text-green-400 flex items-center gap-2"><CheckCircle className="w-4 h-4" />{message}</div>}
+      {error && <div className="card text-sm text-red-400 flex items-center gap-2"><AlertTriangle className="w-4 h-4" />{error}</div>}
+
+      {progress && (
+        <div className="card text-sm">
+          <p className="text-slate-300">{progress.stage} — {progress.message}</p>
+          <div className="w-full bg-slate-700 rounded-full h-2 mt-1">
+            <div className="bg-blue-500 h-full rounded-full transition-all" style={{ width: `${Math.min(100, progress.percent)}%` }} />
+          </div>
+        </div>
+      )}
+
+      <div className="flex flex-wrap gap-2 border-b border-slate-700 pb-2">
+        {tabs.map((tab) => (
+          <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+            className={`px-3 py-1.5 rounded-lg text-sm ${activeTab === tab.id ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}>
+            {tab.label}
           </button>
         ))}
       </div>
 
-      {progress && (
-        <div className="card text-sm">
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-slate-300">{progress.stage}</span>
-            <span className="text-slate-400">{progress.percent}%</span>
+      {activeTab === 'dcim' && (
+        <div className="card space-y-4">
+          <h2 className="text-lg font-semibold text-white flex items-center gap-2"><FolderOpen className="w-5 h-5 text-blue-400" />相册备份 / 恢复</h2>
+          <p className="text-sm text-slate-400">把设备 DCIM 目录拉取到本地，或从本地 DCIM 目录恢复。</p>
+          <div className="flex gap-3">
+            <button onClick={handleDcimBackup} disabled={disabled || loading === 'dcim-backup'} className="btn-primary flex items-center gap-2">
+              {loading === 'dcim-backup' ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}备份相册
+            </button>
+            <button onClick={handleDcimRecover} disabled={disabled || loading === 'dcim-recover'} className="btn-secondary flex items-center gap-2">
+              {loading === 'dcim-recover' ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}恢复相册
+            </button>
           </div>
-          <div className="w-full bg-slate-700 rounded-full h-2">
-            <div className="bg-blue-500 h-full rounded-full transition-all" style={{ width: `${progress.percent}%` }} />
-          </div>
-          <p className="text-xs text-slate-400 mt-1">{progress.message}</p>
         </div>
       )}
 
-      <div className="card space-y-4">
-        {activeTab === 'dcim' && (
-          <>
-            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-              <Folder className="w-5 h-5 text-blue-400" />
-              DCIM 备份 / 恢复
-            </h2>
-            <p className="text-sm text-slate-400">从设备备份或恢复 DCIM（照片/视频）。</p>
-            <div className="flex gap-3">
-              <button onClick={handleDcimBackup} disabled={loading === 'dcim-backup'}
-                className="btn-primary flex items-center gap-2">
-                {loading === 'dcim-backup' ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-                备份 DCIM
-              </button>
-              <button onClick={handleDcimRecover} disabled={loading === 'dcim-recover'}
-                className="btn-secondary flex items-center gap-2">
-                {loading === 'dcim-recover' ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                恢复 DCIM
-              </button>
-            </div>
-          </>
-        )}
-
-        {activeTab === 'adbdd' && (
-          <>
-            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-              <HardDrive className="w-5 h-5 text-blue-400" />
-              ADB-dd 备份 / 恢复
-            </h2>
-            <p className="text-sm text-slate-400">通过 ADB dd 命令备份或恢复分区。</p>
-            <div className="flex gap-3 flex-wrap">
-              <button onClick={handleAdbddBackup} disabled={loading === 'adbdd-backup'}
-                className="btn-primary flex items-center gap-2">
-                {loading === 'adbdd-backup' ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-                备份
-              </button>
-              <button onClick={handleAdbddRecover} disabled={loading === 'adbdd-recover'}
-                className="btn-secondary flex items-center gap-2">
-                {loading === 'adbdd-recover' ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                恢复
-              </button>
-              <button onClick={handleAdbddPrepare} disabled={loading === 'adbdd-prepare'}
-                className="btn-secondary flex items-center gap-2">
-                {loading === 'adbdd-prepare' ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
-                准备并执行
-              </button>
-            </div>
-          </>
-        )}
-
-        {activeTab === 'edl' && (
-          <>
-            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-              <Zap className="w-5 h-5 text-blue-400" />
-              EDL 9008 备份 / 恢复
-            </h2>
-            <p className="text-sm text-slate-400">通过 Qualcomm EDL 9008 模式进行完整设备备份/恢复。</p>
-            <div className="flex gap-3">
-              <button onClick={handleEdlBackup} disabled={loading === 'edl-backup'}
-                className="btn-primary flex items-center gap-2">
-                {loading === 'edl-backup' ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-                EDL 备份
-              </button>
-              <button onClick={handleEdlRecover} disabled={loading === 'edl-recover'}
-                className="btn-secondary flex items-center gap-2">
-                {loading === 'edl-recover' ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                EDL 恢复
-              </button>
-            </div>
-          </>
-        )}
-
-        {activeTab === 'super' && (
-          <>
-            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-              <Shield className="w-5 h-5 text-blue-400" />
-              超级恢复
-            </h2>
-            <p className="text-sm text-slate-400">从超级恢复文件夹恢复设备。</p>
-            <button onClick={handleSuperRecovery} disabled={loading === 'super'}
-              className="btn-primary flex items-center gap-2">
-              {loading === 'super' ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-              开始超级恢复
+      {activeTab === 'adbdd' && (
+        <div className="card space-y-4">
+          <h2 className="text-lg font-semibold text-white flex items-center gap-2"><HardDrive className="w-5 h-5 text-blue-400" />ADB-dd 分区备份</h2>
+          <p className="text-sm text-slate-400">需要 Root。备份时自动跳过 userdata，并在完成后校验 MD5。</p>
+          <div className="flex gap-3">
+            <button onClick={handleAdbddBackup} disabled={disabled || loading === 'adbdd-backup'} className="btn-primary flex items-center gap-2">
+              {loading === 'adbdd-backup' ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}备份分区
             </button>
-          </>
-        )}
-
-        {activeTab === 'twrp' && (
-          <>
-            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-              <Flashlight className="w-5 h-5 text-blue-400" />
-              TWRP 刷写
-            </h2>
-            <p className="text-sm text-slate-400">将 TWRP Recovery 刷写到设备。</p>
-            <button onClick={handleFlashTwrp} disabled={loading === 'twrp' || !currentDevice}
-
-              className="btn-primary flex items-center gap-2">
-              {loading === 'twrp' ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Flashlight className="w-4 h-4" />}
-              刷写 TWRP
+            <button onClick={handleAdbddRecover} disabled={disabled || loading === 'adbdd-recover'} className="btn-secondary flex items-center gap-2">
+              {loading === 'adbdd-recover' ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}恢复分区
             </button>
-          </>
-        )}
+          </div>
+        </div>
+      )}
 
-        {activeTab === 'auto-twrp' && (
-          <>
-            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-              <RefreshCw className="w-5 h-5 text-blue-400" />
-              自动刷写 TWRP
-            </h2>
-            <p className="text-sm text-slate-400">自动下载并刷写对应机型的 TWRP。</p>
-            <button onClick={handleAutoFlashTwrp} disabled={loading === 'auto-twrp' || !currentDevice}
-              className="btn-primary flex items-center gap-2">
-              {loading === 'auto-twrp' ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
-              自动刷写
-            </button>
-          </>
-        )}
+      {activeTab === 'edl' && (
+        <div className="card space-y-4">
+          <h2 className="text-lg font-semibold text-white flex items-center gap-2"><Zap className="w-5 h-5 text-blue-400" />EDL 9008</h2>
+          <p className="text-sm text-slate-400">EDL 批量备份/恢复需要 rawprogram XML。可前往「EDL 分区管理」逐分区操作，或在此选择 XML 文件。</p>
+          <div className="flex gap-3">
+            <button onClick={handleEdlBackup} className="btn-primary flex items-center gap-2"><Download className="w-4 h-4" />EDL 备份</button>
+            <button onClick={handleEdlRecover} className="btn-secondary flex items-center gap-2"><Upload className="w-4 h-4" />EDL 恢复</button>
+          </div>
+        </div>
+      )}
 
-        {activeTab === 'xposed' && (
-          <>
-            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-              <Shield className="w-5 h-5 text-blue-400" />
-              Xposed 安装
-            </h2>
-            <p className="text-sm text-slate-400">在设备上安装 Xposed 框架。</p>
-            <button onClick={handleXposedInstall} disabled={loading === 'xposed'}
-              className="btn-primary flex items-center gap-2">
-              {loading === 'xposed' ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-              安装 Xposed
-            </button>
-          </>
-        )}
-      </div>
+      {activeTab === 'super' && (
+        <div className="card space-y-4">
+          <h2 className="text-lg font-semibold text-white flex items-center gap-2"><Shield className="w-5 h-5 text-blue-400" />超级恢复</h2>
+          <p className="text-sm text-slate-400">按机型资源包中的 XML 序列执行恢复。资源下载完成后可在这里一键执行。</p>
+          <button onClick={handleSuperRecovery} className="btn-primary flex items-center gap-2"><Upload className="w-4 h-4" />开始超级恢复</button>
+        </div>
+      )}
+
+      {activeTab === 'twrp' && (
+        <div className="card space-y-4">
+          <h2 className="text-lg font-semibold text-white flex items-center gap-2"><Shield className="w-5 h-5 text-blue-400" />TWRP</h2>
+          <p className="text-sm text-slate-400">使用当前设备内部型号自动匹配并刷入 TWRP 镜像。请先在资源管理下载 TWRP。</p>
+          <button onClick={handleTwrp} disabled={disabled || loading === 'twrp'} className="btn-primary flex items-center gap-2">
+            {loading === 'twrp' ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Shield className="w-4 h-4" />}刷入 TWRP
+          </button>
+        </div>
+      )}
+
+      {activeTab === 'xposed' && (
+        <div className="card space-y-4">
+          <h2 className="text-lg font-semibold text-white flex items-center gap-2"><Puzzle className="w-5 h-5 text-blue-400" />Xposed</h2>
+          <p className="text-sm text-slate-400">自动识别 SDK 19/25 并安装对应 Xposed 框架。请先在资源管理下载 apks 与 xp 资源。</p>
+          <button onClick={handleXposed} disabled={disabled || loading === 'xposed'} className="btn-primary flex items-center gap-2">
+            {loading === 'xposed' ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}安装 Xposed
+          </button>
+        </div>
+      )}
     </div>
   );
 }

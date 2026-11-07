@@ -1,6 +1,7 @@
-import { useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { X, Send, Bot, ChevronRight, Loader2, Settings, MessageSquare, Search } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
 import { useAgentStore } from '@/stores/agentStore';
 
 export default function AgentPanel() {
@@ -8,17 +9,14 @@ export default function AgentPanel() {
   const { isOpen, messages, isLoading, mode, close, sendMessage, clearMessages, loadModelName, modelName, setMode } = useAgentStore();
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const [draft, setDraft] = useState('');
 
   useEffect(() => {
-    if (isOpen && inputRef.current) {
-      inputRef.current.focus();
-    }
+    if (isOpen && inputRef.current) inputRef.current.focus();
   }, [isOpen]);
 
   useEffect(() => {
-    if (listRef.current) {
-      listRef.current.scrollTop = listRef.current.scrollHeight;
-    }
+    if (listRef.current) listRef.current.scrollTop = listRef.current.scrollHeight;
   }, [messages]);
 
   useEffect(() => {
@@ -27,10 +25,10 @@ export default function AgentPanel() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const val = inputRef.current?.value.trim();
+    const val = draft.trim();
     if (!val || isLoading) return;
     sendMessage(val);
-    if (inputRef.current) inputRef.current.value = '';
+    setDraft('');
   };
 
   const handleNavigate = (path: string) => {
@@ -67,9 +65,7 @@ export default function AgentPanel() {
           <button
             onClick={() => setMode('search')}
             className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium transition-colors ${
-              mode === 'search'
-                ? 'text-blue-400 border-b-2 border-blue-400'
-                : 'text-slate-500 hover:text-slate-300'
+              mode === 'search' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-slate-500 hover:text-slate-300'
             }`}
           >
             <Search className="w-3.5 h-3.5" />
@@ -78,9 +74,7 @@ export default function AgentPanel() {
           <button
             onClick={() => setMode('chat')}
             className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium transition-colors ${
-              mode === 'chat'
-                ? 'text-blue-400 border-b-2 border-blue-400'
-                : 'text-slate-500 hover:text-slate-300'
+              mode === 'chat' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-slate-500 hover:text-slate-300'
             }`}
           >
             <MessageSquare className="w-3.5 h-3.5" />
@@ -100,7 +94,7 @@ export default function AgentPanel() {
               ) : (
                 <>
                   <p className="text-sm text-slate-500">开始与 AI 自由对话</p>
-                  <p className="text-xs text-slate-600 mt-1">询问任何关于 iMooDesktop 的问题</p>
+                  <p className="text-xs text-slate-600 mt-1">询问任何关于 iMooAgentTool 的问题</p>
                 </>
               )}
               {!modelName && (
@@ -181,10 +175,12 @@ export default function AgentPanel() {
               placeholder={mode === 'search' ? '搜索功能...' : '输入消息...'}
               className="flex-1 bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 outline-none focus:border-blue-500/50"
               disabled={isLoading}
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
             />
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || !draft.trim()}
               className="bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white rounded-lg px-3 py-2 transition-colors"
             >
               <Send className="w-4 h-4" />

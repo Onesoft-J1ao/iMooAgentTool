@@ -1,20 +1,23 @@
-interface ModelEntry {
+export interface ModelEntry {
   displayName: string;
   platform: 'otherpass' | 'v3pash' | 'z10';
 }
 
 const modelMap: Record<string, ModelEntry> = {
-  I25:  { displayName: 'Z7',      platform: 'otherpass' },
-  I25C: { displayName: 'Z7 (C)',  platform: 'otherpass' },
-  I25D: { displayName: 'Z7 (D)',  platform: 'otherpass' },
+  I13:  { displayName: 'Z6',      platform: 'otherpass' },
+  I13C: { displayName: 'Z6C',     platform: 'otherpass' },
+  I18:  { displayName: 'Z6',      platform: 'otherpass' },
   I20:  { displayName: 'Z7 3G',   platform: 'otherpass' },
+  I25:  { displayName: 'Z7',      platform: 'otherpass' },
+  I25C: { displayName: 'Z7A',     platform: 'otherpass' },
+  I25D: { displayName: 'Z7S',     platform: 'otherpass' },
   I32:  { displayName: 'Z8',      platform: 'otherpass' },
   I33:  { displayName: 'Z8 Pro',  platform: 'otherpass' },
-  ND01: { displayName: 'Z9',      platform: 'v3pash'    },
-  ND03: { displayName: 'Z9 (ND03)', platform: 'v3pash'  },
-  ND07: { displayName: 'Z10',     platform: 'z10'       },
-  ND08: { displayName: 'Z10 (ND08)', platform: 'z10'    },
-  ND09: { displayName: 'Z10 (ND09)', platform: 'z10'    },
+  ND01: { displayName: 'Z9',      platform: 'v3pash' },
+  ND03: { displayName: 'Z10',     platform: 'z10' },
+  ND07: { displayName: 'Z10',     platform: 'z10' },
+  ND08: { displayName: 'Z11',     platform: 'z10' },
+  ND09: { displayName: 'Z11',     platform: 'z10' },
 };
 
 export function getModelInfo(innermodel: string): ModelEntry | null {

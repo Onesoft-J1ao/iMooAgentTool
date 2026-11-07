@@ -197,10 +197,12 @@ export type RebootMode =
   | 'fastbootd';
 
 export interface RootOptions {
+  innermodel?: string;
   nouserdata?: boolean;
   sdkBranch?: 19 | 25 | 27 | 'nd03' | 'nd08';
   modelChoice?: string;
   sdk25Scheme?: 'boot' | 'recovery';
+  softVersion?: string;
 }
 
 export interface RootContext {
@@ -221,11 +223,11 @@ export interface RootContext {
 
 export const APP_META = {
   name: 'iMooAgentTool',
-  version: '1.1.0',
-  buildDate: '2026-06-18',
+  version: '1.1.1',
+  buildDate: '2026-11-07',
   copyright: 'Copyright (C) 2026 J1ao',
   author: 'J1ao',
   authorQQ: '',
   authorEmail: '',
-  basedOn: 'AllToolBox 1.3.8fix1(独立重写�?',
+  basedOn: 'AllToolBox 1.3.8fix1（业务逻辑参考）',
 };

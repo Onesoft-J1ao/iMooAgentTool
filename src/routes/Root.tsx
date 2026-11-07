@@ -41,7 +41,7 @@ export default function Root() {
     try {
       const ctx = await api.root.getContext(id);
       setContext(ctx);
-      if (ctx.error) setRunning(false);
+      if (!ctx || ctx.error) setRunning(false);
     } catch { /* ignore */ }
   }, []);
 
@@ -53,9 +53,20 @@ export default function Root() {
 
   const handleStart = async () => {
     try {
-      const id = await api.root.start(options);
+      const effectiveOptions: RootOptions = {
+        ...options,
+        innermodel: options.modelChoice || options.innermodel || currentDevice?.innermodel,
+        sdkBranch: options.sdkBranch || (Number(currentDevice?.sdkVersion) as RootOptions['sdkBranch']) || 25,
+        softVersion: currentDevice?.softVersion,
+      };
+      if (!effectiveOptions.innermodel) {
+        throw new Error('请先选择型号');
+      }
+      const id = await api.root.start(effectiveOptions);
+      if (typeof id !== 'string') throw new Error('启动 Root 任务失败');
       setTaskId(id);
       setRunning(true);
+      setContext(null);
     } catch (err) {
       console.error('Root start failed:', err);
     }

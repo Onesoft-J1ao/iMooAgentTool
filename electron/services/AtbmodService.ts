@@ -44,7 +44,7 @@ class AtbmodServiceClass {
     return result;
   }
 
-  async install(file: string) {
+  async install(file: string, serial?: string) {
     if (!fs.existsSync(file)) {
       return { success: false, error: '文件已不存在,跳过' };
     }
@@ -144,8 +144,8 @@ class AtbmodServiceClass {
     return { success: true, modid: prop.modid };
   }
 
-  async listInstalled() {
-    const result = [];
+  async listInstalled(): Promise<Array<{ modid: string; dir: string; hasProp: boolean; prop?: any }>> {
+    const result: Array<{ modid: string; dir: string; hasProp: boolean; prop?: any }> = [];
     if (!fs.existsSync(this.modDir)) {
       return result;
     }
@@ -165,7 +165,7 @@ class AtbmodServiceClass {
     return result;
   }
 
-  async uninstall(modid: string) {
+  async uninstall(modid: string, serial?: string) {
     const targetDir = path.join(this.modDir, modid);
     if (!fs.existsSync(targetDir)) {
       return { success: false, error: '模块不存在: ' + modid };

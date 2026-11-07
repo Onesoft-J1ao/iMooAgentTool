@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { Smartphone, WifiOff } from 'lucide-react';
+import brandIcon from '@/assets/icon.png';
 import { menuItems, categories } from '@/lib/menus';
 import { useDevice } from '@/hooks/useDevice';
 import { getDisplayName } from '@/lib/models';
@@ -30,6 +31,13 @@ export function Sidebar() {
 
   return (
     <aside className="w-56 flex flex-col bg-slate-900/80 border-r border-slate-700/50 h-full">
+      <div className="h-16 flex items-center gap-2 px-4 border-b border-slate-700/50">
+        <img src={brandIcon} alt="iMooAgentTool" className="w-8 h-8 rounded-lg object-cover" />
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-white truncate">iMooAgentTool</p>
+          <p className="text-[10px] text-slate-500">XTC Toolbox</p>
+        </div>
+      </div>
       <div className="flex-1 overflow-y-auto scrollbar-thin py-2">
         {categories.map((category) => {
           const items = menuItems.filter((m) => m.category === category);

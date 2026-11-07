@@ -22,8 +22,10 @@ export default function Magisk() {
     setLoading(true);
     setError('');
     try {
-      const serial = currentDevice?.serial || '';
-      const result = await api.magisk.list(serial);
+      const result = await api.magisk.list();
+      if (result && typeof result === 'object' && 'error' in result) {
+        throw new Error(String(result.error));
+      }
       setModules(Array.isArray(result) ? result : []);
     } catch (err) {
       setError(String(err));

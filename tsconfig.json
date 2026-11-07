@@ -11,11 +11,10 @@
     "isolatedModules": true,
     "declaration": true,
     "jsx": "react-jsx",
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
-      "@electron/*": ["electron/*"],
-      "@shared/*": ["shared/*"]
+      "@/*": ["./src/*"],
+      "@electron/*": ["./electron/*"],
+      "@shared/*": ["./shared/*"]
     }
   },
   "include": ["src/**/*", "shared/**/*", "electron/**/*"],

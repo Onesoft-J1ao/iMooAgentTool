@@ -12,7 +12,7 @@ if (!ensureSingleInstance()) {
 }
 
 const logger = Logger.instance;
-logger.info('main', `iMooDesktop 启动(dev=${paths.isDev})`);
+logger.info('main', `iMooAgentTool 启动(dev=${paths.isDev})`);
 
 const deviceService = DeviceService.instance;
 

@@ -25,6 +25,7 @@ class AgentService {
     { path: '/files', name: '文件管理', keywords: ['file', 'files', '文件', 'adb', 'push', 'pull', '上传', '下载', '管理'], description: '通过ADB浏览、上传、下载、删除、重命名手表文件，支持搜索和批量操作' },
     { path: '/apps', name: '应用管理', keywords: ['app', 'apps', '应用', '安装', '卸载', 'apk', 'z10', '解锁', '自启动'], description: '管理手表应用：安装APK、卸载应用、Z10解锁、配置QQ/微信自启动' },
     { path: '/tools', name: '工具箱', keywords: ['tools', 'tool', '工具', '充电', 'wifi', 'ota', '驱动', 'atbmod', 'build.prop', '属性'], description: '实用工具合集：开启充电、查看系统属性、WiFi ADB连接、离线OTA升级、驱动检测安装、ATBMod模块管理、RootPro优化' },
+    { path: '/cast', name: '投屏控制', keywords: ['scrcpy', '投屏', 'cast', 'screen', '镜像', '远程'], description: '使用 scrcpy 投屏并控制手表，支持帧率、尺寸、保持唤醒和只读模式' },
     { path: '/magisk', name: 'Magisk模块', keywords: ['magisk', '模块', 'module', '面具', 'root', 'zygisk'], description: '管理Magisk模块：查看已安装模块、安装/卸载、启用/停用、从商店搜索安装' },
     { path: '/backup', name: '备份恢复', keywords: ['backup', 'restore', '备份', '恢复', 'dcim', 'edl', 'twrp', 'xposed', '数据'], description: '多种备份恢复方案：DCIM照片备份、ADB-dd全分区备份、EDL深度备份、Super Recovery、TWRP刷入、Xposed安装' },
     { path: '/edl-partitions', name: 'EDL分区管理', keywords: ['edl', 'partition', '分区', 'gpt', 'loader', '刷机', '9008'], description: 'EDL模式下的分区管理：查看GPT分区表、备份/恢复/擦除/验证分区' },
@@ -108,7 +109,7 @@ class AgentService {
         `- path: ${f.path}\n  name: ${f.name}\n  description: ${f.description}`
       ).join('\n');
 
-      const systemPrompt = `You are a feature finder for iMooDesktop, a smartwatch tool application.
+      const systemPrompt = `You are a feature finder for iMooAgentTool, a smartwatch tool application.
 
 Available features:
 ${featuresList}
@@ -176,7 +177,7 @@ If no features match, respond with []`;
     }
 
     try {
-      const systemMessage = { role: 'system' as const, content: '你是一个智能助手，帮助用户使用 iMooDesktop 智能手表工具箱。你可以回答关于软件功能、使用方法和一般性问题。请用中文回复，简洁明了。' };
+      const systemMessage = { role: 'system' as const, content: '你是一个智能助手，帮助用户使用 iMooAgentTool 智能手表工具箱。你可以回答关于软件功能、使用方法和一般性问题。请用中文回复，简洁明了。' };
 
       const response = await fetch(this.buildApiUrl(apiUrl), {
         method: 'POST',

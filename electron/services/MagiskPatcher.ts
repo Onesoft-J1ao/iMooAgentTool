@@ -10,7 +10,7 @@ const logger = {
   debug: (...args: any[]) => console.debug('[MagiskPatcher]', ...args),
 };
 
-async function magiskboot(args: string[], opts: any = { cwd: paths.edlWork }) {
+async function magiskboot(args: string[], opts: any = { cwd: paths.edl }) {
   const magiskbootExe = path.join(paths.bin, 'magiskboot.exe');
   try {
     const r = await subprocessPool.spawn({

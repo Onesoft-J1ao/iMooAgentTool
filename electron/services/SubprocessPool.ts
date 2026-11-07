@@ -2,30 +2,42 @@ import { spawn } from 'node:child_process';
 import { EventEmitter } from 'node:events';
 import * as iconv from 'iconv-lite';
 
-const logger = { debug: () => {}, warn: (...a: any[]) => console.warn(...a), error: (...a: any[]) => console.error(...a) };
-
 class SpawnError extends Error {
-  exitCode: number; stdout: string; stderr: string; duration: number; killed: boolean;
+  exitCode: number;
+  stdout: string;
+  stderr: string;
+  duration: number;
+  killed: boolean;
   constructor(msg: string, code: number, stdout: string, stderr: string, duration: number, _cancelled: boolean, killed: boolean) {
-    super(msg); this.exitCode = code; this.stdout = stdout; this.stderr = stderr; this.duration = duration; this.killed = killed; this.name = 'SpawnError';
+    super(msg);
+    this.exitCode = code;
+    this.stdout = stdout;
+    this.stderr = stderr;
+    this.duration = duration;
+    this.killed = killed;
+    this.name = 'SpawnError';
   }
 }
 
 interface SpawnOpts {
-  cmd: string; args: string[]; cwd?: string; timeout?: number; encoding?: string;
-  taskId?: string; env?: Record<string, string>; captureStdout?: boolean; silent?: boolean;
-  onStdout?: (line: string) => void; onStderr?: (line: string) => void;
+  cmd: string;
+  args: string[];
+  cwd?: string;
+  timeout?: number;
+  encoding?: string;
+  taskId?: string;
+  env?: Record<string, string>;
+  captureStdout?: boolean;
+  silent?: boolean;
+  onStdout?: (line: string) => void;
+  onStderr?: (line: string) => void;
 }
 
 function decode(chunk: Buffer, encoding: string): string {
   if (encoding === 'gbk') {
-    try { return decodeGbk(chunk); } catch { /* fall through */ }
+    try { return iconv.decode(chunk, 'GBK'); } catch { /* fall through */ }
   }
   return chunk.toString('utf-8');
-}
-
-function decodeGbk(buf: Buffer): string {
-  try { return iconv.decode(buf, 'GBK'); } catch { return buf.toString('utf-8'); }
 }
 
 class SubprocessPoolClass {
@@ -35,15 +47,23 @@ class SubprocessPoolClass {
   async spawn(opts: SpawnOpts) {
     const { cmd, args, cwd, timeout = 0, encoding = 'gbk', taskId, env } = opts;
     const captureStdout = opts.captureStdout !== false;
-    const silent = opts.silent ?? false;
     const start = Date.now();
     return new Promise<any>((resolve, reject) => {
-      const proc = spawn(cmd, args, { cwd, env: { ...process.env, ...env } as any, windowsHide: true, shell: false });
+      const proc = spawn(cmd, args, {
+        cwd,
+        env: { ...process.env, ...env } as any,
+        windowsHide: true,
+        shell: false,
+      });
       if (taskId) this.tasks.set(taskId, { taskId, cmd, args, startedAt: start, process: proc });
       const stdoutChunks: Buffer[] = [];
       const stderrChunks: Buffer[] = [];
-      let stdoutStr = '', stderrStr = '', stdoutBuf = '', stderrBuf = '';
-      let killed = false, timeoutHandle: any;
+      let stdoutStr = '';
+      let stderrStr = '';
+      let stdoutBuf = '';
+      let stderrBuf = '';
+      let killed = false;
+      let timeoutHandle: NodeJS.Timeout | undefined;
 
       const processLine = (buf: string, chunk: Buffer, cb?: (line: string) => void) => {
         const decoded = decode(chunk, encoding);
@@ -78,7 +98,7 @@ class SubprocessPoolClass {
         }, timeout);
       }
 
-      proc.on('error', (err: any) => {
+      proc.on('error', (err: Error) => {
         if (timeoutHandle) clearTimeout(timeoutHandle);
         if (taskId) this.tasks.delete(taskId);
         reject(new SpawnError(`启动失败: ${err.message}`, -1, '', '', 0, false, killed));
@@ -87,14 +107,22 @@ class SubprocessPoolClass {
       proc.on('close', (code: number | null) => {
         if (timeoutHandle) clearTimeout(timeoutHandle);
         if (taskId) this.tasks.delete(taskId);
-        if (stdoutBuf.trim()) { opts.onStdout?.(stdoutBuf); this.bus.emit('line', { taskId, line: stdoutBuf, stream: 'stdout' }); }
-        if (stderrBuf.trim()) { opts.onStderr?.(stderrBuf); this.bus.emit('line', { taskId, line: stderrBuf, stream: 'stderr' }); }
+        if (stdoutBuf.trim()) {
+          opts.onStdout?.(stdoutBuf);
+          this.bus.emit('line', { taskId, line: stdoutBuf, stream: 'stdout' });
+        }
+        if (stderrBuf.trim()) {
+          opts.onStderr?.(stderrBuf);
+          this.bus.emit('line', { taskId, line: stderrBuf, stream: 'stderr' });
+        }
         const duration = Date.now() - start;
         const result = {
           exitCode: code,
           stdout: captureStdout ? Buffer.concat(stdoutChunks).toString('utf-8') || stdoutStr : stdoutStr,
           stderr: captureStdout ? Buffer.concat(stderrChunks).toString('utf-8') || stderrStr : stderrStr,
-          duration, signal: undefined as any, killed,
+          duration,
+          signal: undefined as any,
+          killed,
         };
         if (code === 0 && !killed) resolve(result);
         else if (killed) reject(new SpawnError(`进程被 kill: ${cmd}`, code ?? -1, result.stdout, result.stderr, duration, false, true));
@@ -105,18 +133,36 @@ class SubprocessPoolClass {
 
   async *spawnStreaming(opts: SpawnOpts) {
     const queue: string[] = [];
-    let done = false, error: any = null, waiter: ((v: any) => void) | null = null;
+    let done = false;
+    let error: any = null;
+    let waiter: ((v: any) => void) | null = null;
     const onLine = (line: string) => {
       queue.push(line);
-      waiter?.(true); waiter = null;
+      waiter?.(true);
+      waiter = null;
     };
-    this.spawn({ ...opts, onStdout: onLine, onStderr: onLine, captureStdout: false }).then(() => {
-      done = true; waiter?.(true); waiter = null;
-    }).catch((e) => { error = e; done = true; waiter?.(true); waiter = null; });
+    this.spawn({ ...opts, onStdout: onLine, onStderr: onLine, captureStdout: false })
+      .then(() => {
+        done = true;
+        waiter?.(true);
+        waiter = null;
+      })
+      .catch((e) => {
+        error = e;
+        done = true;
+        waiter?.(true);
+        waiter = null;
+      });
     while (true) {
-      if (queue.length > 0) { yield queue.shift()!; continue; }
-      if (done) { if (error) throw error; return; }
-      await new Promise((resolve) => { waiter = resolve; });
+      if (queue.length > 0) {
+        yield queue.shift()!;
+        continue;
+      }
+      if (done) {
+        if (error) throw error;
+        return;
+      }
+      await new Promise<void>((resolve) => { waiter = resolve; });
     }
   }
 
@@ -126,7 +172,9 @@ class SubprocessPoolClass {
     return task.process.kill(signal);
   }
 
-  list() { return Array.from(this.tasks.values()); }
+  list() {
+    return Array.from(this.tasks.values());
+  }
 
   onLine(cb: (data: { taskId?: string; line: string; stream: string }) => void) {
     this.bus.on('line', cb);

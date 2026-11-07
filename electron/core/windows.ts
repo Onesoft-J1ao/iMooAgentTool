@@ -12,6 +12,7 @@ export function createMainWindow(): BrowserWindow {
     minHeight: 600,
     frame: false,
     show: false,
+    icon: join(paths.assets, 'icon.png'),
     webPreferences: {
       preload: paths.preload,
       contextIsolation: true,

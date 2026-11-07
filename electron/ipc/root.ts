@@ -1,7 +1,7 @@
 import { ipcMain } from 'electron';
 import { wrap } from '../lib/ipcHelper';
 import { rootService } from '../services/RootService';
-import type { RootOptions, RootContext } from "../../shared/types";
+import type { RootOptions, RootContext } from '../../shared/types';
 
 export function registerRootIpc() {
   ipcMain.handle(

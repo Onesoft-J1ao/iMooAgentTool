@@ -43,15 +43,15 @@ export function buildAppMenu(): Menu {
       label: 'Help',
       submenu: [
         {
-          label: 'About iMooDesktop',
+          label: 'About iMooAgentTool',
           click: () => {
             dialog.showMessageBox({
               type: 'info',
-              title: 'About iMooDesktop',
-              message: `iMooDesktop v${app.getVersion()}`,
+              title: 'About iMooAgentTool',
+              message: `iMooAgentTool v${app.getVersion()}`,
               detail:
-                'iMooDesktop - XTC 电话手表工具箱\n' +
-                '基于 AllToolBox 1.3.8fix1 业务逻辑独立重写\n' +
+                'iMooAgentTool - XTC 电话手表工具箱\n' +
+                '业务逻辑参考 AllToolBox 1.3.8fix1\n' +
                 `Copyright (C) 2026 J1ao`,
             });
           },

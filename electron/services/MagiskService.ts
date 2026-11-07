@@ -259,7 +259,7 @@ class MagiskServiceClass {
   httpsGetJson(url: string) {
     return new Promise((resolve, reject) => {
       const req = https.get(url, {
-        headers: { 'User-Agent': 'iMooDesktop/1.0' },
+        headers: { 'User-Agent': 'iMooAgentTool/1.1.1' },
         timeout: TIMEOUT.fileOp,
       }, (res) => {
         if (res.statusCode && (res.statusCode < 200 || res.statusCode >= 300)) {
@@ -279,11 +279,11 @@ class MagiskServiceClass {
     });
   }
 
-  httpsDownload(url: string, destPath: string) {
-    return new Promise((resolve, reject) => {
+  httpsDownload(url: string, destPath: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
       const file = fs.createWriteStream(destPath);
       const req = https.get(url, {
-        headers: { 'User-Agent': 'iMooDesktop/1.0' },
+        headers: { 'User-Agent': 'iMooAgentTool/1.1.1' },
         timeout: TIMEOUT.install,
       }, (res) => {
         if (res.statusCode && res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {

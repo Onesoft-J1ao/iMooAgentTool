@@ -15,34 +15,42 @@ const TIMEOUT = {
   install: 120000,
 };
 
+export interface DriverStatusItem {
+  name: string;
+  installed: boolean;
+  version?: string;
+}
+
 class DriverServiceClass {
-  async check() {
+  async check(): Promise<DriverStatusItem[]> {
     const qualcomm = await this.existsGlobInDir('qdbusb*') || await this.existsGlobInDir('qcfilter*') || await this.existsGlobInDir('qcmbn*');
     const adb = await this.existsGlobInDir('android_winusb.inf*');
     const vcRuntime = await this.existsGlobInSystem32('mfc100*') && await this.existsGlobInSystem32('mfc110*') && await this.existsGlobInSystem32('mfc120*');
-    const status = { qualcomm, adb, vcRuntime };
-    const allInstalled = qualcomm && adb && vcRuntime;
-    logger.info('驱动检查: qualcomm=' + qualcomm + ', adb=' + adb + ', vc=' + vcRuntime + ', all=' + allInstalled);
-    return { success: true, status, allInstalled };
+    logger.info(`驱动检查: qualcomm=${qualcomm}, adb=${adb}, vc=${vcRuntime}`);
+    return [
+      { name: 'Qualcomm 9008 驱动', installed: qualcomm },
+      { name: 'ADB 驱动', installed: adb },
+      { name: 'VC++ 运行库', installed: vcRuntime },
+    ];
   }
 
   async installDrivers() {
     const steps = [
-      { name: '检查驱动状态', status: 'pending' },
-      { name: '下载 drivers.zip(若未下载)', status: 'pending' },
-      { name: '安装 ADB 驱动(pnputil)', status: 'pending' },
-      { name: '安装 Qualcomm 9008 驱动(9008.bat)', status: 'pending' },
-      { name: '安装 VC 运行库(vc.exe)', status: 'pending' },
+      { name: '检查驱动状态', status: 'pending' as string, message: '' },
+      { name: '下载 drivers.zip(若未下载)', status: 'pending' as string, message: '' },
+      { name: '安装 ADB 驱动(pnputil)', status: 'pending' as string, message: '' },
+      { name: '安装 Qualcomm 9008 驱动(9008.bat)', status: 'pending' as string, message: '' },
+      { name: '安装 VC 运行库(vc.exe)', status: 'pending' as string, message: '' },
     ];
-    const runStep = async (i: number, fn: () => Promise<any>) => {
+    const runStep = async (i: number, fn: () => Promise<unknown>) => {
       steps[i].status = 'running';
       try {
         await fn();
         steps[i].status = 'success';
         return true;
-      } catch (e: any) {
+      } catch (e) {
         steps[i].status = 'failed';
-        steps[i].message = e.message;
+        steps[i].message = (e as Error).message;
         return false;
       }
     };
@@ -50,30 +58,27 @@ class DriverServiceClass {
       steps[i].status = 'skipped';
       steps[i].message = reason;
     };
-    let status: any = null;
-    let ok = await runStep(0, async () => {
-      const r = await this.check();
-      status = r.status;
-    });
-    if (!ok) return { success: false, steps, error: steps[0].message };
-    ok = await runStep(1, async () => {
-      const driversDir = path.join(paths.resources, 'drivers');
-      if (fs.existsSync(driversDir)) {
-        skipStep(1, 'drivers 已存在,跳过下载');
-        return;
-      }
-      logger.info('下载 drivers 资源...');
-      await cloudService.download('drivers');
-    });
-    if (status.adb) {
+    const status = await this.check();
+    const byName = (name: string) => status.find((s) => s.name.includes(name))?.installed ?? false;
+    const ok0 = await runStep(0, async () => undefined);
+    if (!ok0) return { success: false, steps, error: steps[0].message };
+
+    const driversDir = path.join(paths.resources, 'drivers');
+    if (fs.existsSync(driversDir)) {
+      skipStep(1, 'drivers 已存在,跳过下载');
+    } else {
+      const ok = await runStep(1, async () => {
+        await cloudService.download('drivers');
+      });
+      if (!ok) logger.warn('下载 drivers 失败: ' + steps[1].message);
+    }
+
+    if (byName('ADB')) {
       skipStep(2, 'ADB 驱动已安装');
     } else {
-      ok = await runStep(2, async () => {
-        const infPath = path.join(paths.resources, 'drivers', 'adb', 'android_winusb.inf');
-        if (!fs.existsSync(infPath)) {
-          throw new Error('ADB 驱动 inf 不存在: ' + infPath);
-        }
-        logger.info('安装 ADB 驱动...');
+      const ok = await runStep(2, async () => {
+        const infPath = path.join(driversDir, 'adb', 'android_winusb.inf');
+        if (!fs.existsSync(infPath)) throw new Error('ADB 驱动 inf 不存在: ' + infPath);
         await subprocessPool.spawn({
           cmd: 'pnputil.exe',
           args: ['/add-driver', infPath, '/install'],
@@ -83,15 +88,13 @@ class DriverServiceClass {
       });
       if (!ok) logger.warn('ADB 驱动安装失败: ' + steps[2].message);
     }
-    if (status.qualcomm) {
+
+    if (byName('Qualcomm')) {
       skipStep(3, 'Qualcomm 9008 驱动已安装');
     } else {
-      ok = await runStep(3, async () => {
-        const batPath = path.join(paths.resources, 'drivers', '9008', '9008.bat');
-        if (!fs.existsSync(batPath)) {
-          throw new Error('9008.bat 不存在: ' + batPath);
-        }
-        logger.info('安装 Qualcomm 9008 驱动...');
+      const ok = await runStep(3, async () => {
+        const batPath = path.join(driversDir, '9008', '9008.bat');
+        if (!fs.existsSync(batPath)) throw new Error('9008.bat 不存在: ' + batPath);
         await subprocessPool.spawn({
           cmd: 'cmd.exe',
           args: ['/c', batPath],
@@ -100,17 +103,15 @@ class DriverServiceClass {
           cwd: path.dirname(batPath),
         });
       });
-      if (!ok) logger.warn('Qualcomm 9008 驱动安装失败: ' + steps[3].message);
+      if (!ok) logger.warn('Qualcomm 驱动安装失败: ' + steps[3].message);
     }
-    if (status.vcRuntime) {
+
+    if (byName('VC++')) {
       skipStep(4, 'VC 运行库已安装');
     } else {
-      ok = await runStep(4, async () => {
-        const vcPath = path.join(paths.resources, 'drivers', 'vc.exe');
-        if (!fs.existsSync(vcPath)) {
-          throw new Error('vc.exe 不存在: ' + vcPath);
-        }
-        logger.info('安装 VC 运行库...');
+      const ok = await runStep(4, async () => {
+        const vcPath = path.join(driversDir, 'vc.exe');
+        if (!fs.existsSync(vcPath)) throw new Error('vc.exe 不存在: ' + vcPath);
         await subprocessPool.spawn({
           cmd: vcPath,
           args: [],
@@ -120,7 +121,7 @@ class DriverServiceClass {
       });
       if (!ok) logger.warn('VC 运行库安装失败: ' + steps[4].message);
     }
-    logger.info('驱动和环境配置完毕,部分更改可能需要重启电脑以完成安装');
+
     return { success: true, steps };
   }
 

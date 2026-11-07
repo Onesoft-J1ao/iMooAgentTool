@@ -184,7 +184,18 @@ class RebootServiceClass {
       }
     }
     const edlMode = mode === 'wipe-data' ? 'wipe' : mode;
-    await edlService.flashMisc({ port, mode: edlMode, platform, innermodel });
+    const miscDir = path.join(paths.edl, 'misc');
+    const imageSrc = edlMode === 'ffbm' ? 'ffbm.img' : edlMode === 'wipe' ? 'wipe.img' : edlMode === 'fastbootd' ? 'fastbootd.img' : 'misc.img';
+    const xmlSrc = platform === 'z10' ? 'misc_ND03.xml' : `misc_${innermodel}.xml`;
+    const workDir = path.join(paths.edl, 'rooting');
+    if (!fs.existsSync(workDir)) fs.mkdirSync(workDir, { recursive: true });
+    const imgExt = platform === 'otherpass' ? 'mbn' : 'img';
+    const workXml = path.join(workDir, 'misc.xml');
+    fs.copyFileSync(path.join(miscDir, xmlSrc), workXml);
+    fs.copyFileSync(path.join(miscDir, imageSrc), path.join(workDir, `misc.${imgExt}`));
+    await edlService.loadFirehose(path.join(paths.edl, platform === 'z10' ? 'prog_firehose_ddr.elf' : platform === 'v3pash' ? 'msm8937.mbn' : 'msm8909w.mbn'), port);
+    await edlService.flashPartitions([workXml], port, undefined, workDir);
+    await edlService.reboot(port);
     const modeLabel: any = {
       qmmi: 'QMMI',
       ffbm: 'FFBM',
@@ -203,7 +214,7 @@ class RebootServiceClass {
     let loaded = false;
     for (const loader of loaders) {
       try {
-        await edlService.loadFirehose({ port, loader });
+        await edlService.loadFirehose(path.join(paths.edl, loader), port);
         loaded = true;
         break;
       } catch {}
@@ -211,7 +222,7 @@ class RebootServiceClass {
     if (!loaded) {
       throw new Error('所有 firehose loader 加载失败');
     }
-    await edlService.reboot({ port, loader: 'msm8937.mbn' });
+    await edlService.reboot(port);
   }
 }
 

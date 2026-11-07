@@ -21,7 +21,7 @@ export function EulaModal({ onAccept, onDecline }: EulaModalProps) {
           </div>
 
           <div className="bg-slate-900/50 rounded-lg p-4 mb-4 max-h-64 overflow-y-auto scrollbar-thin text-sm text-slate-300 leading-relaxed space-y-3">
-            <p><strong>iMooDesktop 最终用户许可协议 (EULA)</strong></p>
+            <p><strong>iMooAgentTool 最终用户许可协议 (EULA)</strong></p>
             <p>版本 1.0 | 最后更新: 2026-06-18</p>
 
             <p><strong>1. 许可授予</strong></p>

@@ -10,7 +10,7 @@ interface ConfigSchema {
 }
 
 const store = new Store<ConfigSchema>({
-  name: 'imoodesktop-config',
+  name: 'imooagenttool-config',
   defaults: {
     settings: { ...DEFAULT_SETTINGS },
     windowBounds: { x: 0, y: 0, width: 1200, height: 800 },

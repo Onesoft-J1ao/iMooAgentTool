@@ -7,3 +7,8 @@ declare global {
     api: ElectronApi;
   }
 }
+
+declare module '*.png' {
+  const src: string;
+  export default src;
+}

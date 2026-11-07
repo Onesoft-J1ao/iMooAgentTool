@@ -1,21 +1,27 @@
 appId: io.github.j1ao.imooagenttool
 productName: iMooAgentTool
 copyright: Copyright (C) 2026 J1ao
+electronVersion: 33.4.11
 directories:
   output: release
 files:
   - dist/**/*
   - dist-electron/**/*
-  - resources/**/*
-  - node_modules/**/*
+  - resources/bin/**/*
+  - resources/edl/**/*
+  - resources/scripts/**/*
+  - resources/data/**/*
+  - resources/assets/**/*
   - package.json
 asar: true
 asarUnpack:
-  - resources/bin/**
-  - resources/edl/**
-  - resources/scripts/**
-  - node_modules/usb/**
-  - node_modules/@node-usb/**
+  - resources/bin/**/*
+  - resources/edl/**/*
+  - resources/scripts/**/*
+  - resources/data/**/*
+  - resources/assets/**/*
+  - node_modules/usb/**/*
+  - node_modules/@node-usb/**/*
 win:
   target:
     - target: nsis

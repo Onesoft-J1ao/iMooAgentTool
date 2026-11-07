@@ -1,7 +1,7 @@
 import { ipcMain } from 'electron';
 import { wrap } from '../lib/ipcHelper';
 import { magiskService } from '../services/MagiskService';
-import type { MagiskModule, StoreModule, InstallMethod, UninstallMethod } from "../../shared/types";
+import type { MagiskModule, StoreModule, InstallMethod, UninstallMethod } from '../../shared/types';
 
 export function registerMagiskIpc() {
   ipcMain.handle(

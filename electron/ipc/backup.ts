@@ -1,106 +1,110 @@
-import path from 'node:path';
-import fs from 'node:fs';
-import { ipcMain } from 'electron';
+import { ipcMain, BrowserWindow } from 'electron';
 import { wrap } from '../lib/ipcHelper';
 import { backupService } from '../services/BackupService';
+import { edlService } from '../services/EdlService';
 import { adbService } from '../services/AdbService';
 import { paths } from '../core/paths';
-import type { AdbDdMatchResult } from "../../shared/types";
+import fs from 'node:fs';
+import path from 'node:path';
+import type { AdbDdMatchResult } from '../../shared/types';
+
+function broadcast(channel: string, payload: unknown) {
+  for (const win of BrowserWindow.getAllWindows()) {
+    if (!win.isDestroyed()) win.webContents.send(channel, payload);
+  }
+}
+
+function progress(stage: string, percent: number, message: string) {
+  broadcast('backup:progress', { stage, percent, message });
+}
 
 export function registerBackupIpc() {
   ipcMain.handle(
     'backup:dcim-backup',
-    wrap(async () => {
-      return backupService.backupDcim(paths.cache);
+    wrap(async (_event, { outputDir }: { outputDir: string }) => {
+      return backupService.backupDcim(outputDir, (msg) => progress('DCIM 备份', 50, msg));
     })
   );
 
   ipcMain.handle(
     'backup:dcim-recover',
-    wrap(async () => {
-      return backupService.recoverDcim(paths.cache);
+    wrap(async (_event, { inputDir }: { inputDir: string }) => {
+      return backupService.recoverDcim(inputDir, (msg) => progress('DCIM 恢复', 50, msg));
     })
   );
 
   ipcMain.handle(
     'backup:adbdd-backup',
-    wrap(async () => {
-      return backupService.backupAdbDd(paths.cache);
+    wrap(async (_event, { outputDir }: { outputDir: string }) => {
+      return backupService.backupAdbDd(outputDir, (msg) => progress('ADB-dd 备份', 50, msg));
     })
   );
 
   ipcMain.handle(
     'backup:adbdd-recover',
     wrap(async (_event, { zipPath }: { zipPath: string }) => {
-      return backupService.recoverAdbDd(zipPath);
-    })
-  );
-
-  ipcMain.handle(
-    'backup:prepare-adbdd-recover',
-    wrap(async (_event, { zipPath }: { zipPath: string }): Promise<{ success: boolean; extractDir?: string; match?: { matched: string[]; skipped: string[] }; error?: string }> => {
-      return backupService.prepareAdbDdRecover(zipPath);
-    })
-  );
-
-  ipcMain.handle(
-    'backup:execute-adbdd-recover',
-    wrap(async (_event, { extractDir, parts }: { extractDir: string; parts: string[] }) => {
-      return backupService.executeAdbDdRecover(extractDir, parts);
-    })
-  );
-
-  ipcMain.handle(
-    'backup:flash-twrp',
-    wrap(async (_event, { innermodel }: { innermodel: string }) => {
-      return backupService.autoFlashTwrp(innermodel);
-    })
-  );
-
-  ipcMain.handle(
-    'backup:xposed-install',
-    wrap(async () => {
-      return backupService.installXposed();
+      return backupService.recoverAdbDd(zipPath, (msg) => progress('ADB-dd 恢复', 50, msg));
     })
   );
 
   ipcMain.handle(
     'backup:adbdd-prepare',
-    wrap(async (_event, { zipPath }: { zipPath: string }): Promise<AdbDdMatchResult> => {
-      const extractDir = path.join(paths.cache, `adbdd_prepare_${Date.now()}`);
-      if (!fs.existsSync(extractDir)) {
-        fs.mkdirSync(extractDir, { recursive: true });
+    wrap(async (_event, { zipPath }: { zipPath: string }): Promise<AdbDdMatchResult & { extractDir?: string; success?: boolean; error?: string }> => {
+      const result = await backupService.prepareAdbDdRecover(zipPath, (msg) => progress('准备恢复', 30, msg));
+      if (!result.success || !result.match) {
+        return { matched: [], skipped: [], extractDir: result.extractDir, success: false, error: result.error };
       }
-      const extractZip = (await import('extract-zip')).default;
-      await extractZip(zipPath, { dir: extractDir });
-      const files = fs.readdirSync(extractDir);
-      const images = files.filter(f => f.endsWith('.img') || f.endsWith('.bin') || f.endsWith('.raw'));
-      const matched = images.map(f => path.join(extractDir, f));
-      return { matched, skipped: [] };
+      return { ...result.match, extractDir: result.extractDir, success: true };
     })
   );
 
   ipcMain.handle(
     'backup:adbdd-execute',
     wrap(async (_event, { extractDir, parts }: { extractDir: string; parts: string[] }) => {
-      const devices = await adbService.devices();
-      const device = devices.find(d => d.state === 'device');
-      if (!device) throw new Error('No device connected');
-      const serial = device.serial;
-      for (const part of parts) {
-        const baseName = path.basename(part, path.extname(part));
-        const remotePath = `/sdcard/tmp_${baseName}.img`;
-        await adbService.push(serial, part, remotePath);
-        await adbService.shell(serial, `su -c "dd if=${remotePath} of=/dev/block/by-name/${baseName} bs=4M" 2>/dev/null`);
-        await adbService.shell(serial, `rm -f "${remotePath}"`);
-      }
+      return backupService.executeAdbDdRecover(extractDir, parts, (msg) => progress('恢复分区', 50, msg));
+    })
+  );
+
+  ipcMain.handle(
+    'backup:edl-backup',
+    wrap(async (_event, { xmlFiles, backupDir, port }: { xmlFiles: string[]; backupDir: string; port: string }) => {
+      if (!fs.existsSync(backupDir)) fs.mkdirSync(backupDir, { recursive: true });
+      return edlService.backup9008(xmlFiles, backupDir, port, (msg) => progress('EDL 备份', 50, msg));
+    })
+  );
+
+  ipcMain.handle(
+    'backup:edl-recover',
+    wrap(async (_event, { archivePath, xmlFiles, port }: { archivePath: string; xmlFiles: string[]; port: string }) => {
+      return edlService.recover9008(archivePath, xmlFiles, port, (msg) => progress('EDL 恢复', 50, msg));
+    })
+  );
+
+  ipcMain.handle(
+    'backup:super-recovery',
+    wrap(async (_event, { xmlSets, port }: { xmlSets: string[][]; port: string }) => {
+      return edlService.superRecovery(xmlSets, port, (msg) => progress('Super Recovery', 50, msg));
+    })
+  );
+
+  ipcMain.handle(
+    'backup:flash-twrp',
+    wrap(async (_event, { innermodel }: { innermodel: string }) => {
+      return backupService.autoFlashTwrp(innermodel, (msg) => progress('刷入 TWRP', 50, msg));
     })
   );
 
   ipcMain.handle(
     'backup:auto-flash-twrp',
     wrap(async (_event, { innermodel }: { innermodel: string }) => {
-      return backupService.autoFlashTwrp(innermodel);
+      return backupService.autoFlashTwrp(innermodel, (msg) => progress('自动刷入 TWRP', 50, msg));
+    })
+  );
+
+  ipcMain.handle(
+    'backup:xposed-install',
+    wrap(async () => {
+      return backupService.installXposed((msg) => progress('Xposed 安装', 50, msg));
     })
   );
 }

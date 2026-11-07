@@ -1,14 +1,13 @@
 import path from 'node:path';
+import fs from 'node:fs';
+import { paths } from '../core/paths';
 import { adbService } from './AdbService';
 import { driverService } from './DriverService';
 import { otaService } from './OtaService';
 import { rootProService } from './RootProService';
 import { atbmodService } from './AtbmodService';
 import { updateService } from './UpdateService';
-import { paths } from '../core/paths';
-import type { DriverStatus } from './DriverService';
-import type { AtbModule } from './AtbmodService';
-import type { UpdateInfo } from "../../shared/types";
+import type { UpdateInfo } from '../../shared/types';
 
 class ToolsService {
   async openCharge(serial: string): Promise<string> {
@@ -20,48 +19,44 @@ class ToolsService {
   }
 
   async wifiEnable(serial: string): Promise<string> {
-    return adbService.shell(serial, 'svc wifi enable');
+    await adbService.shell(serial, 'svc wifi enable');
+    return adbService.tcpip(serial, 5555);
   }
 
-  async wifiConnect(serial: string, ssid: string, password: string): Promise<string> {
-    return adbService.shell(
-      serial,
-      `am start -a android.intent.action.MAIN -e ssid "${ssid}" -e password "${password}" --ez connect true`
-    );
+  async wifiConnect(host: string, port = 5555): Promise<string> {
+    return adbService.connect(host, port);
   }
 
-  async otaStart(serial: string, zipPath: string): Promise<void> {
-    return otaService.flashOfflineOta(serial, zipPath);
+  async otaStart(serial: string, zipPath: string) {
+    return otaService.start({ serial, zipPath });
   }
 
-  async rootPro(serial: string): Promise<void> {
-    return rootProService.optimize(serial);
+  async rootPro(serial: string) {
+    return rootProService.run({ serial });
   }
 
-  async checkDrivers(): Promise<DriverStatus> {
-    return driverService.checkAll();
+  async checkDrivers() {
+    return driverService.check();
   }
 
-  async installDrivers(): Promise<void> {
-    await driverService.installQualcommDriver();
-    await driverService.installAdbDriver();
-    await driverService.installVcRuntime();
+  async installDrivers() {
+    return driverService.installDrivers();
   }
 
-  async atbmodScan(serial: string): Promise<AtbModule[]> {
-    return atbmodService.scan(path.join(paths.resources, 'modules'));
+  async atbmodScan(serial: string) {
+    return atbmodService.scan();
   }
 
-  async atbmodInstall(serial: string, file: string): Promise<void> {
-    return atbmodService.install(serial, file);
+  async atbmodInstall(serial: string, file: string) {
+    return atbmodService.install(file, serial);
   }
 
-  async atbmodList(serial: string): Promise<AtbModule[]> {
-    return atbmodService.list(serial);
+  async atbmodList(serial: string) {
+    return atbmodService.listInstalled();
   }
 
-  async atbmodUninstall(serial: string, modid: string): Promise<void> {
-    return atbmodService.uninstall(serial, modid);
+  async atbmodUninstall(serial: string, modid: string) {
+    return atbmodService.uninstall(modid, serial);
   }
 
   async checkAppUpdate(): Promise<UpdateInfo> {

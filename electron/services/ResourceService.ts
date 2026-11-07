@@ -18,10 +18,8 @@ class ResourceService {
     let manifest: ManifestEntry[];
     try {
       const raw = fs.readFileSync(manifestPath, 'utf-8');
-      manifest = JSON.parse(raw);
-      if (!Array.isArray(manifest)) {
-        manifest = manifest.files || manifest.entries || [];
-      }
+      const parsed = JSON.parse(raw);
+      manifest = Array.isArray(parsed) ? parsed : (parsed.files || parsed.entries || []);
     } catch (err: any) {
       logger.error(SRC, `Failed to parse manifest: ${err.message}`);
       return results;

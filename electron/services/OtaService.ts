@@ -18,7 +18,7 @@ const TIMEOUT = {
 
 class OtaServiceClass {
   async start(opts: any) {
-    const steps = [
+    const steps: Array<{ name: string; status: string; message?: string }> = [
       { name: '检查 ADB 设备', status: 'pending' },
       { name: '读取设备信息(innermodel/softversion)', status: 'pending' },
       { name: '检测 V3 协议(V3 版本无法离线 OTA)', status: 'pending' },
@@ -92,7 +92,7 @@ class OtaServiceClass {
     if (!ok) return { success: false, steps, scrcpyStarted: false, error: steps[6].message };
     let scrcpyStarted = false;
     await runStep(7, async () => {
-      const pid = await scrcpyService.launch({
+      const pid = await scrcpyService.launch('', {
         stayAwake: true,
         showTouches: true,
         windowTitle: '请点击手表上的"开始升级"',

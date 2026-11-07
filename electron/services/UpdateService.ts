@@ -14,7 +14,7 @@ class UpdateService {
 
     try {
       const response = await fetch(
-        'https://api.github.com/repos/J1ao/iMooDesktop/releases/latest',
+        'https://api.github.com/repos/Onesoft-J1ao/iMooAgentTool/releases/latest',
         {
           headers: { Accept: 'application/json' },
           signal: AbortSignal.timeout(10000),

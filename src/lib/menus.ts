@@ -10,6 +10,7 @@ import {
   Database,
   Settings,
   Terminal,
+  MonitorPlay,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -29,6 +30,7 @@ export const menuItems: MenuItem[] = [
   { id: 'files', label: '文件管理', icon: File, path: '/files', category: '文件管理' },
   { id: 'apps', label: '应用管理', icon: Grid, path: '/apps', category: '文件管理' },
   { id: 'tools', label: '工具箱', icon: Wrench, path: '/tools', category: '系统工具' },
+  { id: 'cast', label: '投屏控制', icon: MonitorPlay, path: '/cast', category: '系统工具' },
   { id: 'magisk', label: 'Magisk', icon: Database, path: '/magisk', category: '系统工具' },
   { id: 'backup', label: '备份恢复', icon: HardDrive, path: '/backup', category: '系统工具' },
   { id: 'edl-partitions', label: 'EDL 分区', icon: Terminal, path: '/edl-partitions', category: '其他' },

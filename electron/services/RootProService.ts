@@ -17,7 +17,7 @@ const TIMEOUT = {
 
 class RootProServiceClass {
   async run(options: any) {
-    const steps = [
+    const steps: Array<{ name: string; status: string; message?: string }> = [
       { name: '检查 ADB 设备', status: 'pending' },
       { name: '等待 boot_completed', status: 'pending' },
       { name: '读取设备信息', status: 'pending' },

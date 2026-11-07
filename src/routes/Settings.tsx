@@ -310,7 +310,7 @@ export default function SettingsPage() {
       <div className="card flex items-center gap-4 text-sm">
         <Info className="w-5 h-5 text-blue-400" />
         <div>
-          <p className="text-white font-medium">iMooDesktop</p>
+          <p className="text-white font-medium">iMooAgentTool</p>
           <p className="text-slate-400">版本 {version}</p>
         </div>
       </div>

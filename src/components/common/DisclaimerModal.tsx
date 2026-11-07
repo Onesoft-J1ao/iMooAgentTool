@@ -22,7 +22,7 @@ export function DisclaimerModal({ onAccept, onDecline }: DisclaimerModalProps) {
 
           <div className="bg-slate-900/50 rounded-lg p-4 mb-4 max-h-64 overflow-y-auto scrollbar-thin text-sm text-slate-300 leading-relaxed space-y-3">
             <p>
-              本软件 (iMooDesktop) 是一款用于 XTC 电话手表的工具箱软件，由社区开发者提供。
+              本软件 (iMooAgentTool) 是一款用于 XTC 电话手表的工具箱软件，由社区开发者提供。
               使用本软件可能对设备进行系统级操作，包括但不限于获取 Root 权限、修改系统分区、
               刷写固件等操作。
             </p>
