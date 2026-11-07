@@ -1,0 +1,10 @@
+{
+  "options": [
+    {"value": "A", "label": "返回上级菜单"},
+    {"value": "1", "label": "开启/关闭快速启动"},
+    {"value": "2", "label": "版本信息"},
+    {"value": "3", "label": "CMD窗口设置"},
+    {"value": "4", "label": "强制重新安装驱动"}
+    {"value": "5", "label": "强制执行工具箱更新"}
+  ]
+}

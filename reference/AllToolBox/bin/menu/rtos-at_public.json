@@ -1,0 +1,18 @@
+{
+  "options": [
+    {"value": "A", "label": "返回上级菜单"},
+    {"value": "1", "label": "[AT+CGMI]查询模块制造商"},
+    {"value": "2", "label": "[AT+CGMM]查询模块型号"},
+    {"value": "3", "label": "[AT+CGMR]查询固件版本"},
+    {"value": "4", "label": "[AT+CGATT?]查询数据业务附着状态"},
+    {"value": "5", "label": "[AT+COPS? ]查询当前注册的运营商网络"},
+    {"value": "6", "label": "[ATD(phone)]发起语音拨号"},
+    {"value": "7", "label": "[AT+CEREG?]查询4G网络注册状态"},
+    {"value": "8", "label": "[AT+CMGS]发送短信"},
+    {"value": "9", "label": "[ATD*99#ONT=1]拨号上网"},
+    {"value": "10", "label": "[AT+SPLBAND=0]设置频段"},
+    {"value": "11", "label": "[AT+SPIMEI?]查询设备IMEI号"},
+    {"value": "12", "label": "[AT+CGDCONT?]查询PDP上下文配置"},
+    {"value": "13", "label": "[AT+CFUN=1,1]复位重启模块"}
+  ]
+}

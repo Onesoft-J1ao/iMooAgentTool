@@ -1,0 +1,10 @@
+{
+  "options": [
+    {"value": "A", "label": "返回上级菜单"},
+    {"value": "1", "label": "[AT+BINDNUM]获取绑定号码"},
+    {"value": "2", "label": "[AT+DOWNLOADMODEL]获取机型"},
+    {"value": "3", "label": "[AT+DOWNLOADVERSION]获取设备版本号"},
+    {"value": "4", "label": "[AT+BATCAP]获取电池电量"},
+    {"value": "5", "label": "[AT+ELEQUAN]获取电池电量"}
+  ]
+}

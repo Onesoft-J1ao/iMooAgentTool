@@ -1,0 +1,14 @@
+{
+  "options": [
+    {"value": "A", "label": "返回上级菜单"},
+    {"value": "1", "label": "离线OTA/VABOTA升级"},
+    {"value": "2", "label": "刷入TWRP"},
+    {"value": "3", "label": "备份与恢复"},
+    {"value": "4", "label": "安卓8.1root后优化"},
+    {"value": "5", "label": "scrcpy投屏"},
+    {"value": "6", "label": "打开充电可用"},
+    {"value": "7", "label": "刷入固件包或超级恢复"},
+    {"value": "8", "label": "刷入xp框架"},
+    {"value": "9", "label": "无线调试[adb]"}
+  ]
+}

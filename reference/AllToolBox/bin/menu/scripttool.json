@@ -1,0 +1,12 @@
+{
+  "options": [
+    {"value": "A", "label": "返回上级菜单"},
+    {"value": "1", "label": "型号与innermodel对照表"},
+    {"value": "2", "label": "导入本地root文件"},
+    {"value": "3", "label": "一键root[不刷userdata]"},
+    {"value": "4", "label": "开机自刷Recovery"},
+    {"value": "5", "label": "读取手表信息"}
+    {"value": "6", "label": "一键root[无adb运行]"}
+    {"value": "7", "label": "一键root[即无adb也不刷ud]"}
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "options": [
+    {"value": "1", "label": "一键Root设备"},
+    {"value": "11", "label": "进入RTOS专区"},
+    {"value": "2", "label": "在此处打开cmd[含adb环境]"},
+    {"value": "3", "label": "关于脚本"},
+    {"value": "4", "label": "常用功能"},
+    {"value": "5", "label": "高级重启"},
+    {"value": "6", "label": "下载功能所需资源"},
+    {"value": "7", "label": "应用管理"},
+    {"value": "8", "label": "Magisk模块管理"},
+    {"value": "9", "label": "高级功能"},
+    {"value": "10", "label": "工具箱设置"},
+    {"value": "DEBUG",   "hidden": true, "trigger": "debug"}
+    {"value": "DEBUG",   "hidden": true, "trigger": "hidemenu"}
+    {"value": "DEBUG",   "hidden": true, "trigger": "hidset"}
+  ]
+}

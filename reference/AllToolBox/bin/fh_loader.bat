@@ -1,0 +1,13 @@
+:run
+fh_loader.exe %* >FHtmp.txt || goto error
+exit /b
+:error
+call nutime
+copy /Y .\FHtmp.txt .\logs\FHerror_%nutime%.txt >nul
+set FHtmp=""
+set /p FHtmp=%error%9008读取或刷入失败！[输入"log"输出日志]按任意键重新尝试...
+if "%FHtmp%"=="log" (
+type FHtmp.txt
+pause.exe 重试...
+)
+goto run

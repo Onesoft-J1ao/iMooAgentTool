@@ -1,0 +1,8 @@
+{
+  "options": [
+    {"value": "A", "label": "返回上级菜单"},
+    {"value": "1", "label": "magisk官方接口安装模块[推荐]"},
+    {"value": "2", "label": "sh脚本模拟安装[通用]"},
+    {"value": "3", "label": "强制进行安装[!危险!]"}
+  ]
+}

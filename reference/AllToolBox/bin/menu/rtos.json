@@ -1,0 +1,16 @@
+{
+  "options": [
+    {"value": "A", "label": "返回主页"},
+    {"value": "1", "label": "USB2U盘[解除拨号限制]"},
+    {"value": "2", "label": "安装应用"},
+    {"value": "3", "label": "卸载应用"},
+    {"value": "4", "label": "已安装应用列表"},
+    {"value": "5", "label": "导出应用"},
+    {"value": "6", "label": "AT指令工具"},
+    {"value": "7", "label": "相册"},
+    {"value": "8", "label": "通话记录"},
+    {"value": "9", "label": "个人中心"},
+    {"value": "10", "label": "RPK商店"},
+    {"value": "11", "label": "应用商店开关"}
+  ]
+}

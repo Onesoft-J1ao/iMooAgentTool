@@ -1,0 +1,9 @@
+{
+  "options": [
+    {"value": "A", "label": "返回上级菜单"},
+    {"value": "1", "label": "列出模块"},
+    {"value": "2", "label": "搜索模块"},
+    {"value": "3", "label": "其他功能"},
+    {"value": "4", "label": "关于模块商店"}
+  ]
+}

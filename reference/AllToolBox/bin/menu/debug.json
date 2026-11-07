@@ -1,0 +1,10 @@
+{
+  "options": [
+    {"value": "A", "label": "返回上级菜单"},
+    {"value": "1", "label": "色卡"},
+    {"value": "2", "label": "调整为未使用状态"},
+    {"value": "3", "label": "调整为使用状态"},
+    {"value": "4", "label": "调整为更新状态"},
+    {"value": "5", "label": "debug sel"}
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "options": [
+    {"value": "A", "label": "返回主页"},
+    {"value": "1", "label": "公用指令"},
+    {"value": "2", "label": "小天才私有指令"}
+  ]
+}

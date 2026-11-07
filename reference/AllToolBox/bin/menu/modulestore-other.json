@@ -1,0 +1,8 @@
+{
+  "options": [
+    {"value": "A", "label": "返回上级菜单"},
+    {"value": "1", "label": "模块商店公告"},
+    {"value": "2", "label": "模块商店帮助"},
+    {"value": "3", "label": "作者排行榜"}
+  ]
+}

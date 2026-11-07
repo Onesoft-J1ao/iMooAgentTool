@@ -1,0 +1,8 @@
+{
+  "options": [
+    {"value": "A", "label": "返回上级菜单"},
+    {"value": "1", "label": "安装应用"},
+    {"value": "2", "label": "卸载应用"},
+    {"value": "3", "label": "设置微信QQ为开机自启应用"}
+  ]
+}

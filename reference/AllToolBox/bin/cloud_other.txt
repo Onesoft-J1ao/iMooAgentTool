@@ -1,0 +1,23 @@
+twrp资源 twrp.zip 解压到.\EDL
+xp-资源 xp.zip 解压到.\tmp\
+8.1Root后优化资源 rootproapks.zip 解压到.\
+驱动资源 drivers.zip -> 解压到.\
+Q1S I17D.zip -> .\EDL\I17D.zip
+Q1Y DI01.zip -> .\EDL\DI01.zip
+Q2 DI02.zip -> .\EDL\DI02.zip
+Z1 I16.zip -> .\EDL\I16.zip
+Z1S I17.zip -> .\EDL\I17.zip
+Z2 I12.zip -> .\EDL\I12.zip
+Z3 IB.zip -> .\EDL\IB.zip
+Z5 I13.zip -> .\EDL\I13.zip
+Z5A I13C.zip -> .\EDL\I13C.zip
+Z5Pro I19.zip -> .\EDL\I19.zip
+Z6 I18.zip -> .\EDL\I18.zip
+Z6dfb I20.zip -> .\EDL\I20.zip
+Z7 I25.zip -> .\EDL\I25.zip
+Z7A I25C.zip -> .\EDL\I25C.zip
+Z7S I25D.zip -> .\EDL\I25D.zip
+Z8 I32.zip -> .\EDL\I32.zip
+Z8A ND07.zip -> .\EDL\ND07.zip
+Z9 ND01.zip -> .\EDL\ND01.zip
+Z10 ND03.zip -> .\EDL\ND03.zip

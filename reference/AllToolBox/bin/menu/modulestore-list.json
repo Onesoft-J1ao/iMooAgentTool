@@ -1,0 +1,12 @@
+{
+  "options": [
+    {"value": "A", "label": "返回上级菜单"},
+    {"value": "7", "label": "全部模块"},
+    {"value": "1", "label": "开机动画模块"},
+    {"value": "2", "label": "表盘模块"},
+    {"value": "3", "label": "工具模块"},
+    {"value": "4", "label": "字体模块"},
+    {"value": "5", "label": "游戏模块"},
+    {"value": "6", "label": "系统优化模块"}
+  ]
+}

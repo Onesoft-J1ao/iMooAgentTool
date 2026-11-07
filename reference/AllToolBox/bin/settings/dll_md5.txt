@@ -1,0 +1,9 @@
+26ecb32db5b85380d3e862caf75ff826  ./7z.dll
+2433379ecd9292a3ecaeffdacead90d4  ./AdbWinApi.dll
+1016deceeedc4493f7ba05750aebcf43  ./AdbWinUsbApi.dll
+05774f6530c64de46f2ed840559cb3b8  ./SDL2.dll
+2afc22763e8f4a5f6d671ef7841de0f6  ./avcodec-61.dll
+306780bfc5a77a776388604898bc51f5  ./avformat-61.dll
+8089a41efe089fe8ae48cc15feeaa8b2  ./avutil-59.dll
+1198630b117ec78d65bda30558638054  ./libusb-1.0.dll
+b0eb202010b24d946a1706662599cf33  ./swresample-5.dll

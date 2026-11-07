@@ -1,0 +1,6 @@
+{
+  "options": [
+    {"value": "y", "label": "是"},
+    {"value": "n", "label": "否"}
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "options": [
+    {"value": "A", "label": "返回上级菜单"},
+    {"value": "1", "label": "选择并安装单个APK文件"},
+    {"value": "2", "label": "选择并安装多个APK文件"},
+    {"value": "3", "label": "选择一个文件夹并安装其中的所有APK文件"},
+    {"value": "4", "label": "切换install方式安装"},
+    {"value": "5", "label": "切换data方式安装"},
+    {"value": "6", "label": "切换调用第三方安装器方式安装"},
+    {"value": "7", "label": "切换install-create方式安装"}
+  ]
+}

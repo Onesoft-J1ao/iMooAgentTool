@@ -1,0 +1,30 @@
+{
+  "options": [
+    {"value": "1", "label": "运行root基础组件"},
+    {"value": "2", "label": "twrp资源"},
+    {"value": "3", "label": "xp-资源"},
+    {"value": "4", "label": "8.1Root后优化资源"},
+    {"value": "5", "label": "驱动资源"},
+    {"value": "6", "label": "Q1S-Root资源"},
+    {"value": "7", "label": "Q1Y-Root资源"},
+    {"value": "8", "label": "Q2-Root资源"},
+    {"value": "9", "label": "Z1-Root资源"},
+    {"value": "10", "label": "Z1S-Root资源"},
+    {"value": "11", "label": "Z2-Root资源"},
+    {"value": "12", "label": "Z3-Root资源"},
+    {"value": "13", "label": "Z5-Root资源"},
+    {"value": "14", "label": "Z5A-Root资源"},
+    {"value": "15", "label": "Z5Pro-Root资源"},
+    {"value": "16", "label": "Z6-Root资源"},
+    {"value": "17", "label": "Z6dfb-Root资源"},
+    {"value": "18", "label": "Z7-Root资源"},
+    {"value": "19", "label": "Z7A-Root资源"},
+    {"value": "20", "label": "Z7S-Root资源"},
+    {"value": "21", "label": "Z8-Root资源"},
+    {"value": "22", "label": "Z8A-Root资源"},
+    {"value": "23", "label": "Z9-Root资源"},
+    {"value": "24", "label": "Z10-Root资源"}
+    {"value": "25", "label": "Z11-Root资源"}
+    {"value": "26", "label": "D3-Root资源"}
+  ]
+}

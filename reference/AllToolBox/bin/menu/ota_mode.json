@@ -1,0 +1,9 @@
+{
+  "options": [
+    {"value": "A", "label": "返回上级菜单"},
+    {"value": "1", "label": "自动下载最新版"},
+    {"value": "2", "label": "手动选择文件"},
+    {"value": "3", "label": "进入qmmi然后自动下载最新版"},
+    {"value": "4", "label": "进入qmmi然后手动选择文件"}
+  ]
+}

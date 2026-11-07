@@ -1,0 +1,11 @@
+{
+  "options": [
+    {"value": "A", "label": "返回上级菜单"},
+    {"value": "1", "label": "相册备份"},
+    {"value": "2", "label": "相册恢复"},
+    {"value": "3", "label": "9008重要分区备份"},
+    {"value": "4", "label": "9008重要分区恢复"},
+    {"value": "5", "label": "adb通用分区备份(不含ud)"},
+    {"value": "6", "label": "adb通用分区恢复(不含ud)"}
+  ]
+}

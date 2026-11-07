@@ -1,0 +1,13 @@
+{
+  "options": [
+    {"value": "A", "label": "返回上级菜单"},
+    {"value": "1", "label": "选择并刷入单个magisk模块"},
+    {"value": "2", "label": "选择并刷入多个magisk模块"},
+    {"value": "3", "label": "选择一个文件夹并刷入其中的所有magisk模块"},
+    {"value": "4", "label": "列出已安装的magisk模块"},
+    {"value": "5", "label": "卸载指定magisk模块"},
+    {"value": "6", "label": "切换安装magisk模块的方式"},
+    {"value": "7", "label": "切换卸载magisk模块的方式"},
+    {"value": "8", "label": "刷入XTC Patch[可用于更新]"}
+  ]
+}
