@@ -3,7 +3,6 @@ release/
 electron-dist/
 *.log
 .DS_Store
-package-lock.json
 tmp-asar-extract/
 temp-extract/
 *.exe
